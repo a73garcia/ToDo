@@ -1,9 +1,3 @@
-"""
-Task Planner Pro
-calendar_panel.py
-Panel de calendario
-"""
-
 import calendar
 from datetime import datetime
 import tkinter as tk
