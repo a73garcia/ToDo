@@ -582,7 +582,412 @@ class MainWindow(tk.Tk):
 
         self.create_task_table()
 
+    # ======================================================
+    # TABLA DE TAREAS
+    # ======================================================
 
+    def create_task_table(self):
+
+        columns = (
+
+            "ID",
+
+            "Título",
+
+            "Responsable",
+
+            "Estado",
+
+            "Prioridad",
+
+            "Categoría",
+
+            "Inicio",
+
+            "Vencimiento",
+
+            "Avance"
+
+        )
+
+        self.tree = ttk.Treeview(
+
+            self.table_frame,
+
+            columns=columns,
+
+            show="headings",
+
+            selectmode="browse"
+
+        )
+
+        self.tree.pack(
+
+            fill="both",
+
+            expand=True,
+
+            padx=10,
+
+            pady=10
+
+        )
+
+        scrollbar_y = ttk.Scrollbar(
+
+            self.table_frame,
+
+            orient="vertical",
+
+            command=self.tree.yview
+
+        )
+
+        scrollbar_y.pack(
+
+            side="right",
+
+            fill="y"
+
+        )
+
+        scrollbar_x = ttk.Scrollbar(
+
+            self.table_frame,
+
+            orient="horizontal",
+
+            command=self.tree.xview
+
+        )
+
+        scrollbar_x.pack(
+
+            side="bottom",
+
+            fill="x"
+
+        )
+
+        self.tree.configure(
+
+            yscrollcommand=scrollbar_y.set,
+
+            xscrollcommand=scrollbar_x.set
+
+        )
+
+        widths = {
+
+            "ID":70,
+
+            "Título":350,
+
+            "Responsable":170,
+
+            "Estado":120,
+
+            "Prioridad":120,
+
+            "Categoría":150,
+
+            "Inicio":110,
+
+            "Vencimiento":110,
+
+            "Avance":90
+
+        }
+
+        for columna in columns:
+
+            self.tree.heading(
+
+                columna,
+
+                text=columna,
+
+                command=lambda c=columna:
+
+                    self.sort_table(c)
+
+            )
+
+            self.tree.column(
+
+                columna,
+
+                width=widths[columna],
+
+                anchor="center"
+
+            )
+
+        self.tree.column(
+
+            "Título",
+
+            anchor="w"
+
+        )
+
+        self.tree.tag_configure(
+
+            "Pendiente",
+
+            background="#FFF6CC"
+
+        )
+
+        self.tree.tag_configure(
+
+            "En curso",
+
+            background="#DCEEFF"
+
+        )
+
+        self.tree.tag_configure(
+
+            "Bloqueada",
+
+            background="#FFD9D9"
+
+        )
+
+        self.tree.tag_configure(
+
+            "Finalizada",
+
+            background="#DFF5DF"
+
+        )
+
+        self.tree.bind(
+
+            "<<TreeviewSelect>>",
+
+            self.on_select_task
+
+        )
+
+        self.tree.bind(
+
+            "<Double-1>",
+
+            lambda e:self.edit_task()
+
+        )
+
+        self.tree.bind(
+
+            "<Button-3>",
+
+            self.popup_menu
+
+        )
+
+    # ======================================================
+    # RECARGAR TABLA
+    # ======================================================
+
+    def refresh_table(self):
+
+        for item in self.tree.get_children():
+
+            self.tree.delete(item)
+
+        for tarea in self.tasks:
+
+            self.tree.insert(
+
+                "",
+
+                "end",
+
+                iid=str(tarea.id),
+
+                values=(
+
+                    tarea.id,
+
+                    tarea.titulo,
+
+                    tarea.responsable,
+
+                    tarea.estado,
+
+                    tarea.prioridad,
+
+                    tarea.categoria,
+
+                    tarea.fecha_inicio,
+
+                    tarea.fecha_prevista,
+
+                    f"{tarea.avance}%"
+
+                ),
+
+                tags=(
+
+                    tarea.estado,
+
+                )
+
+            )
+
+    # ======================================================
+    # SELECCIÓN
+    # ======================================================
+
+    def on_select_task(
+
+        self,
+
+        event=None
+
+    ):
+
+        seleccion = self.tree.selection()
+
+        if not seleccion:
+
+            self.selected_task = None
+
+            return
+
+        task_id = int(
+
+            seleccion[0]
+
+        )
+
+        self.selected_task = self.excel.get_task(
+
+            task_id
+
+        )
+
+        if self.selected_task:
+
+            self.status.set(
+
+                f"Tarea seleccionada: "
+
+                f"{self.selected_task.titulo}"
+
+            )
+
+    # ======================================================
+    # ORDENAR
+    # ======================================================
+
+    def sort_table(
+
+        self,
+
+        column
+
+    ):
+
+        filas = [
+
+            (
+
+                self.tree.set(
+
+                    item,
+
+                    column
+
+                ),
+
+                item
+
+            )
+
+            for item
+
+            in self.tree.get_children()
+
+        ]
+
+        filas.sort()
+
+        for indice, (_, item) in enumerate(filas):
+
+            self.tree.move(
+
+                item,
+
+                "",
+
+                indice
+
+            )
+
+    # ======================================================
+    # MENÚ CONTEXTUAL
+    # ======================================================
+
+    def popup_menu(
+
+        self,
+
+        event
+
+    ):
+
+        menu = tk.Menu(
+
+            self,
+
+            tearoff=False
+
+        )
+
+        menu.add_command(
+
+            label="Editar",
+
+            command=self.edit_task
+
+        )
+
+        menu.add_command(
+
+            label="Duplicar",
+
+            command=self.duplicate_task
+
+        )
+
+        menu.add_command(
+
+            label="Eliminar",
+
+            command=self.delete_task
+
+        )
+
+        menu.tk_popup(
+
+            event.x_root,
+
+            event.y_root
+
+        )
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
 
 
