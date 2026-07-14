@@ -1,9 +1,3 @@
-"""
-Task Planner Pro
-TaskPlanner.py
-Punto de entrada de la aplicación
-"""
-
 import sys
 import traceback
 from tkinter import messagebox
