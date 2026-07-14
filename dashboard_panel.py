@@ -1,12 +1,3 @@
-"""
-=========================================================
-Task Planner Pro
-dashboard_panel.py
-=========================================================
-Dashboard principal
-=========================================================
-"""
-
 from __future__ import annotations
 
 import tkinter as tk
