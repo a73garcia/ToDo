@@ -1780,10 +1780,1314 @@ Avance global: {datos['avance_global']}%
         self.full_refresh()
         
         
+    # ======================================================
+    # PREFERENCIAS
+    # ======================================================
 
+    def open_preferences(self):
+
+        win = tk.Toplevel(self)
+
+        win.title("Preferencias")
+
+        win.geometry("650x450")
+
+        win.resizable(False, False)
+
+        ttk.Label(
+
+            win,
+
+            text="Configuración de la aplicación",
+
+            font=("Segoe UI", 14, "bold")
+
+        ).pack(pady=15)
+
+        self.dark_theme = tk.BooleanVar(value=False)
+
+        ttk.Checkbutton(
+
+            win,
+
+            text="Modo oscuro",
+
+            variable=self.dark_theme,
+
+            command=self.apply_theme
+
+        ).pack(anchor="w", padx=20, pady=5)
+
+        self.autosave = tk.BooleanVar(value=True)
+
+        ttk.Checkbutton(
+
+            win,
+
+            text="Guardar automáticamente",
+
+            variable=self.autosave
+
+        ).pack(anchor="w", padx=20)
+
+        self.auto_backup = tk.BooleanVar(value=True)
+
+        ttk.Checkbutton(
+
+            win,
+
+            text="Crear copia al cerrar",
+
+            variable=self.auto_backup
+
+        ).pack(anchor="w", padx=20)
+
+        ttk.Separator(win).pack(fill="x", pady=15)
+
+        ttk.Button(
+
+            win,
+
+            text="Guardar",
+
+            command=win.destroy
+
+        ).pack(pady=10)
+
+    # ======================================================
+    # TEMA
+    # ======================================================
+
+    def apply_theme(self):
+
+        try:
+
+            style = ttk.Style()
+
+            if self.dark_theme.get():
+
+                style.theme_use("clam")
+
+            else:
+
+                style.theme_use("vista")
+
+        except Exception:
+
+            pass
+
+    # ======================================================
+    # ACTUALIZAR TÍTULO
+    # ======================================================
+
+    def update_title(self):
+
+        total = len(self.tasks)
+
+        self.title(
+
+            f"{APP_NAME} {APP_VERSION}   ({total} tareas)"
+
+        )
+
+    # ======================================================
+    # AUTOGUARDADO
+    # ======================================================
+
+    def autosave_if_needed(self):
+
+        if getattr(self, "autosave", None):
+
+            if self.autosave.get():
+
+                self.excel.save()
+
+    # ======================================================
+    # TEMPORIZADOR
+    # ======================================================
+
+    def start_timer(self):
+
+        self.update_clock()
+
+    def update_clock(self):
+
+        self.status.set(
+
+            datetime.now().strftime(
+
+                "%d/%m/%Y %H:%M:%S"
+
+            )
+
+        )
+
+        self.after(
+
+            1000,
+
+            self.update_clock
+
+        )
+
+    # ======================================================
+    # ESTADO
+    # ======================================================
+
+    def update_status(self, text):
+
+        self.status.set(text)
+
+        self.update_idletasks()
+
+    # ======================================================
+    # BARRA DE PROGRESO
+    # ======================================================
+
+    def create_progressbar(self):
+
+        self.progress = ttk.Progressbar(
+
+            self.statusbar,
+
+            mode="determinate",
+
+            maximum=100,
+
+            length=180
+
+        )
+
+        self.progress.pack(
+
+            side="right",
+
+            padx=10
+
+        )
+
+    def set_progress(self, value):
+
+        self.progress["value"] = value
+
+        self.update_idletasks()
+
+    # ======================================================
+    # LIMPIAR PROGRESO
+    # ======================================================
+
+    def clear_progress(self):
+
+        self.set_progress(0)
+
+    # ======================================================
+    # ACTUALIZACIÓN GLOBAL
+    # ======================================================
+
+    def refresh_everything(self):
+
+        self.set_progress(10)
+
+        self.load_tasks()
+
+        self.set_progress(30)
+
+        self.refresh_table()
+
+        self.set_progress(50)
+
+        self.refresh_dashboard()
+
+        self.refresh_calendar()
+
+        self.refresh_kanban()
+
+        self.refresh_gantt()
+
+        self.set_progress(80)
+
+        self.show_notifications()
+
+        self.update_title()
+
+        self.update_status_statistics()
+
+        self.set_progress(100)
+
+        self.after(
+
+            400,
+
+            self.clear_progress
+
+        )
         
         
+    # ======================================================
+    # PANEL DE DETALLES
+    # ======================================================
+
+    def create_details_panel(self):
+
+        self.details = ttk.LabelFrame(
+
+            self.right_panel,
+
+            text="Detalles de la tarea",
+
+            padding=10
+
+        )
+
+        self.details.pack(
+
+            fill="x",
+
+            padx=10,
+
+            pady=5
+
+        )
+
+        self.lbl_title = ttk.Label(
+
+            self.details,
+
+            text="",
+
+            font=("Segoe UI", 12, "bold")
+
+        )
+
+        self.lbl_title.grid(
+
+            row=0,
+
+            column=0,
+
+            sticky="w"
+
+        )
+
+        self.lbl_status = ttk.Label(self.details)
+
+        self.lbl_priority = ttk.Label(self.details)
+
+        self.lbl_owner = ttk.Label(self.details)
+
+        self.lbl_dates = ttk.Label(self.details)
+
+        self.lbl_progress = ttk.Label(self.details)
+
+        self.lbl_project = ttk.Label(self.details)
+
+        self.lbl_category = ttk.Label(self.details)
+
+        self.lbl_status.grid(row=1, column=0, sticky="w")
+        self.lbl_priority.grid(row=2, column=0, sticky="w")
+        self.lbl_owner.grid(row=3, column=0, sticky="w")
+        self.lbl_dates.grid(row=4, column=0, sticky="w")
+        self.lbl_progress.grid(row=5, column=0, sticky="w")
+        self.lbl_project.grid(row=6, column=0, sticky="w")
+        self.lbl_category.grid(row=7, column=0, sticky="w")
+
+    # ======================================================
+    # ACTUALIZAR DETALLES
+    # ======================================================
+
+    def update_details(self):
+
+        if self.selected_task is None:
+
+            return
+
+        t = self.selected_task
+
+        self.lbl_title.config(
+
+            text=t.titulo
+
+        )
+
+        self.lbl_status.config(
+
+            text=f"Estado: {t.estado}"
+
+        )
+
+        self.lbl_priority.config(
+
+            text=f"Prioridad: {t.prioridad}"
+
+        )
+
+        self.lbl_owner.config(
+
+            text=f"Responsable: {t.responsable}"
+
+        )
+
+        self.lbl_dates.config(
+
+            text=f"{t.fecha_inicio} → {t.fecha_prevista}"
+
+        )
+
+        self.lbl_progress.config(
+
+            text=f"Avance: {t.avance}%"
+
+        )
+
+        self.lbl_project.config(
+
+            text=f"Proyecto: {t.proyecto}"
+
+        )
+
+        self.lbl_category.config(
+
+            text=f"Categoría: {t.categoria}"
+
+        )
+
+    # ======================================================
+    # ADJUNTOS
+    # ======================================================
+
+    def open_attachment(self):
+
+        if self.selected_task is None:
+
+            return
+
+        if not self.selected_task.adjuntos:
+
+            messagebox.showinfo(
+
+                APP_NAME,
+
+                "No hay adjuntos."
+
+            )
+
+            return
+
+        archivo = self.selected_task.adjuntos[0]
+
+        import os
+
+        try:
+
+            os.startfile(
+
+                archivo.ruta
+
+            )
+
+        except Exception as ex:
+
+            messagebox.showerror(
+
+                APP_NAME,
+
+                str(ex)
+
+            )
+
+    # ======================================================
+    # AÑADIR ADJUNTO
+    # ======================================================
+
+    def add_attachment(self):
+
+        if self.selected_task is None:
+
+            return
+
+        fichero = filedialog.askopenfilename()
+
+        if not fichero:
+
+            return
+
+        from pathlib import Path
+
+        p = Path(fichero)
+
+        self.selected_task.add_attachment(
+
+            p.name,
+
+            str(p),
+
+            p.stat().st_size
+
+        )
+
+        self.excel.update_task(
+
+            self.selected_task
+
+        )
+
+    # ======================================================
+    # HISTORIAL
+    # ======================================================
+
+    def show_history(self):
+
+        if self.selected_task is None:
+
+            return
+
+        win = tk.Toplevel(self)
+
+        win.title("Historial")
+
+        tree = ttk.Treeview(
+
+            win,
+
+            columns=(
+
+                "Fecha",
+
+                "Usuario",
+
+                "Avance",
+
+                "Comentario"
+
+            ),
+
+            show="headings"
+
+        )
+
+        tree.pack(
+
+            fill="both",
+
+            expand=True
+
+        )
+
+        for c in (
+
+            "Fecha",
+
+            "Usuario",
+
+            "Avance",
+
+            "Comentario"
+
+        ):
+
+            tree.heading(
+
+                c,
+
+                text=c
+
+            )
+
+        for h in self.selected_task.historial:
+
+            tree.insert(
+
+                "",
+
+                "end",
+
+                values=(
+
+                    h.fecha,
+
+                    h.usuario,
+
+                    h.avance,
+
+                    h.comentario
+
+                )
+
+            )
+
+    # ======================================================
+    # COMENTARIOS
+    # ======================================================
+
+    def edit_comments(self):
+
+        if self.selected_task is None:
+
+            return
+
+        dialog = tk.Toplevel(self)
+
+        dialog.title("Comentarios")
+
+        txt = tk.Text(
+
+            dialog,
+
+            width=80,
+
+            height=20
+
+        )
+
+        txt.pack(
+
+            fill="both",
+
+            expand=True
+
+        )
+
+        txt.insert(
+
+            "1.0",
+
+            self.selected_task.comentarios
+
+        )
+
+        def save():
+
+            self.selected_task.comentarios = txt.get(
+
+                "1.0",
+
+                "end"
+
+            ).strip()
+
+            self.excel.update_task(
+
+                self.selected_task
+
+            )
+
+            dialog.destroy()
+
+        ttk.Button(
+
+            dialog,
+
+            text="Guardar",
+
+            command=save
+
+        ).pack(pady=5)
         
+        
+    # ======================================================
+    # FAVORITOS
+    # ======================================================
+
+    def toggle_favorite(self):
+
+        if self.selected_task is None:
+            return
+
+        self.selected_task.favorita = (
+            not self.selected_task.favorita
+        )
+
+        self.excel.update_task(
+            self.selected_task
+        )
+
+        self.refresh_table()
+
+        self.update_details()
+
+    # ======================================================
+    # COLOR
+    # ======================================================
+
+    def choose_task_color(self):
+
+        if self.selected_task is None:
+            return
+
+        from tkinter.colorchooser import askcolor
+
+        color = askcolor()[1]
+
+        if color:
+
+            self.selected_task.color = color
+
+            self.excel.update_task(
+                self.selected_task
+            )
+
+            self.refresh_table()
+
+    # ======================================================
+    # ETIQUETAS
+    # ======================================================
+
+    def edit_tags(self):
+
+        if self.selected_task is None:
+            return
+
+        valor = simpledialog.askstring(
+
+            "Etiquetas",
+
+            "Separadas por coma:",
+
+            initialvalue=self.selected_task.etiquetas
+
+        )
+
+        if valor is None:
+            return
+
+        self.selected_task.etiquetas = valor
+
+        self.excel.update_task(
+
+            self.selected_task
+
+        )
+
+        self.refresh_table()
+
+    # ======================================================
+    # CAMBIAR PRIORIDAD
+    # ======================================================
+
+    def change_priority(
+
+        self,
+
+        prioridad
+
+    ):
+
+        if self.selected_task is None:
+
+            return
+
+        self.selected_task.prioridad = prioridad
+
+        self.excel.update_task(
+
+            self.selected_task
+
+        )
+
+        self.refresh()
+
+    # ======================================================
+    # CAMBIAR ESTADO
+    # ======================================================
+
+    def change_status(
+
+        self,
+
+        estado
+
+    ):
+
+        if self.selected_task is None:
+
+            return
+
+        self.selected_task.estado = estado
+
+        self.excel.update_task(
+
+            self.selected_task
+
+        )
+
+        self.refresh()
+
+    # ======================================================
+    # DUPLICAR PROYECTO
+    # ======================================================
+
+    def duplicate_project(self):
+
+        if self.selected_task is None:
+
+            return
+
+        proyecto = self.selected_task.proyecto
+
+        tareas = [
+
+            t.clone()
+
+            for t
+
+            in self.excel.load_tasks()
+
+            if t.proyecto == proyecto
+
+        ]
+
+        for tarea in tareas:
+
+            tarea.id = 0
+
+            tarea.avance = 0
+
+            tarea.estado = STATUS_PENDING
+
+            self.excel.add_task(tarea)
+
+        self.refresh()
+
+    # ======================================================
+    # ESTADÍSTICAS
+    # ======================================================
+
+    def show_statistics(self):
+
+        datos = self.metrics.executive_summary()
+
+        texto = f"""
+
+Total tareas: {datos['total_tareas']}
+
+Activas: {datos['tareas_activas']}
+
+Finalizadas: {datos['tareas_finalizadas']}
+
+Retrasadas: {datos['tareas_retrasadas']}
+
+Avance: {datos['avance_global']}%
+
+"""
+
+        messagebox.showinfo(
+
+            "Estadísticas",
+
+            texto
+
+        )
+
+    # ======================================================
+    # ACTIVIDAD
+    # ======================================================
+
+    def show_activity(self):
+
+        self.show_history()
+
+    # ======================================================
+    # ACCIONES RÁPIDAS
+    # ======================================================
+
+    def quick_complete(self):
+
+        if self.selected_task is None:
+
+            return
+
+        self.selected_task.finalizar()
+
+        self.excel.update_task(
+
+            self.selected_task
+
+        )
+
+        self.refresh()
+
+    def quick_progress(self):
+
+        if self.selected_task is None:
+
+            return
+
+        self.selected_task.avance = min(
+
+            100,
+
+            self.selected_task.avance + 10
+
+        )
+
+        self.excel.update_task(
+
+            self.selected_task
+
+        )
+
+        self.refresh()
+
+    # ======================================================
+    # PANEL LATERAL
+    # ======================================================
+
+    def refresh_side_panel(self):
+
+        self.update_details()
+
+        self.show_notifications()
+
+        self.update_status_statistics()
+        
+        
+    # ======================================================
+    # GUARDAR CONFIGURACIÓN
+    # ======================================================
+
+    def save_settings(self):
+
+        try:
+
+            self.settings.ultima_pestana = self.notebook.index(
+                self.notebook.select()
+            )
+
+            self.settings.sidebar_width = self.left_panel.winfo_width()
+
+            self.settings.ultima_apertura = datetime.now().strftime(
+                DATETIME_FORMAT
+            )
+
+            self.excel.save_settings(self.settings)
+
+        except Exception as ex:
+
+            print(ex)
+
+    # ======================================================
+    # CARGAR CONFIGURACIÓN
+    # ======================================================
+
+    def load_settings(self):
+
+        try:
+
+            self.settings = self.excel.load_settings()
+
+        except Exception:
+
+            from models import AppSettings
+
+            self.settings = AppSettings()
+
+    # ======================================================
+    # RESTAURAR INTERFAZ
+    # ======================================================
+
+    def restore_ui(self):
+
+        try:
+
+            self.notebook.select(
+
+                self.settings.ultima_pestana
+
+            )
+
+        except Exception:
+
+            pass
+
+    # ======================================================
+    # EXPORTAR CONFIGURACIÓN
+    # ======================================================
+
+    def export_settings(self):
+
+        fichero = filedialog.asksaveasfilename(
+
+            defaultextension=".json",
+
+            filetypes=[
+
+                ("JSON","*.json")
+
+            ]
+
+        )
+
+        if not fichero:
+
+            return
+
+        import json
+
+        with open(
+
+            fichero,
+
+            "w",
+
+            encoding="utf8"
+
+        ) as f:
+
+            json.dump(
+
+                self.settings.to_dict(),
+
+                f,
+
+                indent=4,
+
+                ensure_ascii=False
+
+            )
+
+    # ======================================================
+    # IMPORTAR CONFIGURACIÓN
+    # ======================================================
+
+    def import_settings(self):
+
+        fichero = filedialog.askopenfilename(
+
+            filetypes=[
+
+                ("JSON","*.json")
+
+            ]
+
+        )
+
+        if not fichero:
+
+            return
+
+        import json
+
+        from models import AppSettings
+
+        with open(
+
+            fichero,
+
+            encoding="utf8"
+
+        ) as f:
+
+            datos = json.load(f)
+
+        self.settings = AppSettings.from_dict(
+
+            datos
+
+        )
+
+        self.restore_ui()
+
+    # ======================================================
+    # ACERCA DE
+    # ======================================================
+
+    def about(self):
+
+        messagebox.showinfo(
+
+            APP_NAME,
+
+            f"""
+
+{APP_NAME}
+
+Versión {APP_VERSION}
+
+Planificador profesional
+
+Dashboard
+
+Kanban
+
+Calendario
+
+Gantt
+
+Power BI
+
+Excel
+
+Python
+
+"""
+
+        )
+
+    # ======================================================
+    # COMPROBAR CAMBIOS
+    # ======================================================
+
+    def has_changes(self):
+
+        return self.excel.has_pending_changes()
+
+    # ======================================================
+    # SALIR
+    # ======================================================
+
+    def exit_application(self):
+
+        if self.has_changes():
+
+            r = messagebox.askyesnocancel(
+
+                APP_NAME,
+
+                "Hay cambios sin guardar.\n¿Desea guardarlos?"
+
+            )
+
+            if r is None:
+
+                return
+
+            if r:
+
+                self.excel.save()
+
+        if self.auto_backup.get():
+
+            self.backup.create_zip_backup()
+
+        self.save_settings()
+
+        self.destroy()
+
+    # ======================================================
+    # INICIALIZACIÓN
+    # ======================================================
+
+    def initialize_application(self):
+
+        self.load_settings()
+
+        self.restore_ui()
+
+        self.register_shortcuts()
+
+        self.start_timer()
+
+        self.refresh_everything()
+
+        self.protocol(
+
+            "WM_DELETE_WINDOW",
+
+            self.exit_application
+
+        )
+
+        self.status.set(
+
+            "Aplicación lista"
+
+        )
+        
+        
+# ======================================================
+# COMPROBACIÓN DE DEPENDENCIAS
+# ======================================================
+
+def check_environment():
+
+    paquetes = [
+
+        "openpyxl",
+
+        "matplotlib",
+
+        "tkcalendar"
+
+    ]
+
+    faltan = []
+
+    import importlib
+
+    for paquete in paquetes:
+
+        try:
+
+            importlib.import_module(paquete)
+
+        except ImportError:
+
+            faltan.append(paquete)
+
+    if faltan:
+
+        messagebox.showwarning(
+
+            APP_NAME,
+
+            "Faltan dependencias:\n\n"
+
+            + "\n".join(faltan)
+
+        )
+
+
+# ======================================================
+# CONFIGURAR LOGGING
+# ======================================================
+
+def configure_logging():
+
+    import logging
+
+    logging.basicConfig(
+
+        filename="taskplanner.log",
+
+        level=logging.INFO,
+
+        format="%(asctime)s %(levelname)s %(message)s"
+
+    )
+
+    logging.info("Aplicación iniciada")
+
+
+# ======================================================
+# SPLASH SCREEN
+# ======================================================
+
+class SplashScreen(tk.Toplevel):
+
+    def __init__(self, parent):
+
+        super().__init__(parent)
+
+        self.overrideredirect(True)
+
+        self.geometry("420x220")
+
+        ttk.Label(
+
+            self,
+
+            text=APP_NAME,
+
+            font=("Segoe UI", 22, "bold")
+
+        ).pack(expand=True)
+
+        ttk.Label(
+
+            self,
+
+            text=f"Versión {APP_VERSION}"
+
+        ).pack()
+
+        self.progress = ttk.Progressbar(
+
+            self,
+
+            mode="indeterminate"
+
+        )
+
+        self.progress.pack(
+
+            fill="x",
+
+            padx=20,
+
+            pady=20
+
+        )
+
+        self.progress.start(10)
+
+
+# ======================================================
+# CARGA
+# ======================================================
+
+def load_application(app):
+
+    app.update_status(
+
+        "Inicializando..."
+
+    )
+
+    app.load_tasks()
+
+    app.refresh_everything()
+
+    app.initialize_application()
+
+
+# ======================================================
+# MAIN
+# ======================================================
+
+def main():
+
+    configure_logging()
+
+    root = MainWindow()
+
+    splash = SplashScreen(root)
+
+    root.withdraw()
+
+    check_environment()
+
+    root.after(
+
+        1500,
+
+        lambda: (
+
+            splash.destroy(),
+
+            root.deiconify(),
+
+            load_application(root)
+
+        )
+
+    )
+
+    root.mainloop()
+
+
+# ======================================================
+# ENTRADA
+# ======================================================
+
+if __name__ == "__main__":
+
+    try:
+
+        main()
+
+    except Exception as ex:
+
+        import traceback
+
+        traceback.print_exc()
+
+        messagebox.showerror(
+
+            APP_NAME,
+
+            str(ex)
+
+        )
         
         
 
