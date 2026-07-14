@@ -989,7 +989,329 @@ class CalendarPanel(ttk.Frame):
 
         super().destroy()
             
+    # =====================================================
+    # MENÚ CONTEXTUAL
+    # =====================================================
 
+    def create_context_menu(self):
+
+        self.menu = tk.Menu(
+
+            self,
+
+            tearoff=False
+
+        )
+
+        self.menu.add_command(
+
+            label="Abrir",
+
+            command=self.open_selected
+
+        )
+
+        self.menu.add_command(
+
+            label="Editar",
+
+            command=self.edit_selected
+
+        )
+
+        self.menu.add_separator()
+
+        self.menu.add_command(
+
+            label="Marcar como finalizada",
+
+            command=self.complete_selected
+
+        )
+
+        self.menu.add_command(
+
+            label="Duplicar",
+
+            command=self.duplicate_selected
+
+        )
+
+        self.menu.add_separator()
+
+        self.menu.add_command(
+
+            label="Eliminar",
+
+            command=self.delete_selected
+
+        )
+
+        self.task_list.bind(
+
+            "<Button-3>",
+
+            self.show_context_menu
+
+        )
+
+    # =====================================================
+    # MOSTRAR MENÚ
+    # =====================================================
+
+    def show_context_menu(self, event):
+
+        item = self.task_list.identify_row(event.y)
+
+        if item:
+
+            self.task_list.selection_set(item)
+
+            self.menu.tk_popup(
+
+                event.x_root,
+
+                event.y_root
+
+            )
+
+    # =====================================================
+    # ABRIR
+    # =====================================================
+
+    def open_selected(self):
+
+        task_id = self.get_selected_task_id()
+
+        if task_id is None:
+
+            return
+
+        if self.task_open_callback:
+
+            self.task_open_callback(task_id)
+
+    # =====================================================
+    # EDITAR
+    # =====================================================
+
+    def edit_selected(self):
+
+        self.open_selected()
+
+    # =====================================================
+    # FINALIZAR
+    # =====================================================
+
+    def complete_selected(self):
+
+        task_id = self.get_selected_task_id()
+
+        if task_id is None:
+
+            return
+
+        task = self.find_task(task_id)
+
+        if task is None:
+
+            return
+
+        task.finalizar()
+
+        if self.task_change_callback:
+
+            self.task_change_callback(task)
+
+        self.refresh()
+
+    # =====================================================
+    # DUPLICAR
+    # =====================================================
+
+    def duplicate_selected(self):
+
+        task_id = self.get_selected_task_id()
+
+        if task_id is None:
+
+            return
+
+        task = self.find_task(task_id)
+
+        if task is None:
+
+            return
+
+        if hasattr(self, "duplicate_callback"):
+
+            self.duplicate_callback(task)
+
+    # =====================================================
+    # ELIMINAR
+    # =====================================================
+
+    def delete_selected(self):
+
+        task_id = self.get_selected_task_id()
+
+        if task_id is None:
+
+            return
+
+        if hasattr(self, "delete_callback"):
+
+            self.delete_callback(task_id)
+
+    # =====================================================
+    # CALLBACKS
+    # =====================================================
+
+    def set_duplicate_callback(
+
+        self,
+
+        callback
+
+    ):
+
+        self.duplicate_callback = callback
+
+    def set_delete_callback(
+
+        self,
+
+        callback
+
+    ):
+
+        self.delete_callback = callback
+
+    # =====================================================
+    # ATAJOS
+    # =====================================================
+
+    def register_shortcuts(self):
+
+        self.task_list.bind(
+
+            "<Return>",
+
+            lambda e: self.open_selected()
+
+        )
+
+        self.task_list.bind(
+
+            "<Delete>",
+
+            lambda e: self.delete_selected()
+
+        )
+
+        self.task_list.bind(
+
+            "<F2>",
+
+            lambda e: self.edit_selected()
+
+        )
+
+    # =====================================================
+    # ENFOQUE
+    # =====================================================
+
+    def focus(self):
+
+        self.task_list.focus_set()
+
+    # =====================================================
+    # EXPORTAR CSV
+    # =====================================================
+
+    def export_csv(self):
+
+        if not hasattr(self, "csv_callback"):
+
+            return
+
+        self.csv_callback(self.tasks)
+
+    def set_csv_callback(
+
+        self,
+
+        callback
+
+    ):
+
+        self.csv_callback = callback
+
+    # =====================================================
+    # EXPORTAR EXCEL
+    # =====================================================
+
+    def export_excel(self):
+
+        if not hasattr(self, "excel_callback"):
+
+            return
+
+        self.excel_callback(self.tasks)
+
+    def set_excel_callback(
+
+        self,
+
+        callback
+
+    ):
+
+        self.excel_callback = callback
+
+    # =====================================================
+    # ACTUALIZAR UNA TAREA
+    # =====================================================
+
+    def update_task(self, task):
+
+        for i, current in enumerate(self.tasks):
+
+            if current.id == task.id:
+
+                self.tasks[i] = task
+
+                break
+
+        self.refresh()
+
+    # =====================================================
+    # AÑADIR UNA TAREA
+    # =====================================================
+
+    def add_task(self, task):
+
+        self.tasks.append(task)
+
+        self.refresh()
+
+    # =====================================================
+    # ELIMINAR UNA TAREA
+    # =====================================================
+
+    def remove_task(self, task_id):
+
+        self.tasks = [
+
+            t
+
+            for t in self.tasks
+
+            if t.id != task_id
+
+        ]
+
+        self.refresh()
         
         
         
