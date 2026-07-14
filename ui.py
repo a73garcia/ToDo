@@ -303,3 +303,291 @@ class MainWindow(tk.Tk):
             command=self.backup.create_backup
 
         )
+
+    # ======================================================
+    # BARRA DE HERRAMIENTAS
+    # ======================================================
+
+    def create_toolbar(self):
+
+        self.toolbar = ttk.Frame(
+            self,
+            padding=5
+        )
+
+        self.toolbar.pack(
+            fill="x",
+            side="top"
+        )
+
+        ttk.Button(
+            self.toolbar,
+            text="➕ Nueva",
+            command=self.new_task,
+            width=12
+        ).pack(side="left", padx=2)
+
+        ttk.Button(
+            self.toolbar,
+            text="✏ Editar",
+            command=self.edit_task,
+            width=12
+        ).pack(side="left", padx=2)
+
+        ttk.Button(
+            self.toolbar,
+            text="🗑 Eliminar",
+            command=self.delete_task,
+            width=12
+        ).pack(side="left", padx=2)
+
+        ttk.Separator(
+            self.toolbar,
+            orient="vertical"
+        ).pack(side="left", fill="y", padx=8)
+
+        ttk.Label(
+            self.toolbar,
+            text="Buscar:"
+        ).pack(side="left")
+
+        self.search_entry = ttk.Entry(
+            self.toolbar,
+            textvariable=self.search_text,
+            width=35
+        )
+
+        self.search_entry.pack(
+            side="left",
+            padx=5
+        )
+
+        self.search_entry.bind(
+            "<KeyRelease>",
+            lambda e: self.search_tasks()
+        )
+
+        ttk.Separator(
+            self.toolbar,
+            orient="vertical"
+        ).pack(side="left", fill="y", padx=8)
+
+        ttk.Button(
+            self.toolbar,
+            text="🔄 Actualizar",
+            command=self.refresh
+        ).pack(side="left", padx=2)
+
+        ttk.Button(
+            self.toolbar,
+            text="📊 Power BI",
+            command=self.powerbi.refresh_all
+        ).pack(side="left", padx=2)
+
+        ttk.Button(
+            self.toolbar,
+            text="💾 Backup",
+            command=self.backup.create_backup
+        ).pack(side="left", padx=2)
+
+    # ======================================================
+    # BARRA DE ESTADO
+    # ======================================================
+
+    def create_statusbar(self):
+
+        self.statusbar = ttk.Label(
+            self,
+            textvariable=self.status,
+            anchor="w",
+            relief="sunken"
+        )
+
+        self.statusbar.pack(
+            side="bottom",
+            fill="x"
+        )
+
+    # ======================================================
+    # LAYOUT PRINCIPAL
+    # ======================================================
+
+    def create_main_layout(self):
+
+        self.main = ttk.PanedWindow(
+            self,
+            orient="horizontal"
+        )
+
+        self.main.pack(
+            fill="both",
+            expand=True
+        )
+
+        # -----------------------------------------
+
+        self.left_panel = ttk.Frame(
+            self.main,
+            width=300
+        )
+
+        self.right_panel = ttk.Frame(
+            self.main
+        )
+
+        self.main.add(
+            self.left_panel,
+            weight=1
+        )
+
+        self.main.add(
+            self.right_panel,
+            weight=5
+        )
+
+        self.create_left_panel()
+
+        self.create_notebook()
+
+    # ======================================================
+    # PANEL IZQUIERDO
+    # ======================================================
+
+    def create_left_panel(self):
+
+        ttk.Label(
+            self.left_panel,
+            text="Filtros",
+            font=("Segoe UI", 12, "bold")
+        ).pack(
+            anchor="w",
+            padx=10,
+            pady=(10,5)
+        )
+
+        ttk.Button(
+            self.left_panel,
+            text="Todas",
+            command=self.refresh
+        ).pack(fill="x", padx=10, pady=2)
+
+        ttk.Button(
+            self.left_panel,
+            text="Pendientes",
+            command=lambda: self.filter_status("Pendiente")
+        ).pack(fill="x", padx=10, pady=2)
+
+        ttk.Button(
+            self.left_panel,
+            text="En curso",
+            command=lambda: self.filter_status("En curso")
+        ).pack(fill="x", padx=10, pady=2)
+
+        ttk.Button(
+            self.left_panel,
+            text="Bloqueadas",
+            command=lambda: self.filter_status("Bloqueada")
+        ).pack(fill="x", padx=10, pady=2)
+
+        ttk.Button(
+            self.left_panel,
+            text="Finalizadas",
+            command=lambda: self.filter_status("Finalizada")
+        ).pack(fill="x", padx=10, pady=2)
+
+        ttk.Separator(
+            self.left_panel
+        ).pack(fill="x", padx=10, pady=10)
+
+        ttk.Label(
+            self.left_panel,
+            text="Notificaciones",
+            font=("Segoe UI", 12, "bold")
+        ).pack(
+            anchor="w",
+            padx=10
+        )
+
+        self.notification_list = tk.Listbox(
+            self.left_panel,
+            height=12
+        )
+
+        self.notification_list.pack(
+            fill="both",
+            expand=True,
+            padx=10,
+            pady=10
+        )
+
+    # ======================================================
+    # NOTEBOOK
+    # ======================================================
+
+    def create_notebook(self):
+
+        self.notebook = ttk.Notebook(
+            self.right_panel
+        )
+
+        self.notebook.pack(
+            fill="both",
+            expand=True
+        )
+
+        self.dashboard = DashboardPanel(
+            self.notebook
+        )
+
+        self.calendar = CalendarPanel(
+            self.notebook
+        )
+
+        self.kanban = KanbanPanel(
+            self.notebook
+        )
+
+        self.gantt = GanttPanel(
+            self.notebook
+        )
+
+        self.table_frame = ttk.Frame(
+            self.notebook
+        )
+
+        self.notebook.add(
+            self.dashboard,
+            text="📊 Dashboard"
+        )
+
+        self.notebook.add(
+            self.calendar,
+            text="📅 Calendario"
+        )
+
+        self.notebook.add(
+            self.kanban,
+            text="📋 Kanban"
+        )
+
+        self.notebook.add(
+            self.gantt,
+            text="📈 Gantt"
+        )
+
+        self.notebook.add(
+            self.table_frame,
+            text="📄 Tareas"
+        )
+
+        self.create_task_table()
+
+
+
+
+
+
+
+
+
+
