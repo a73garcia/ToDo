@@ -1,3 +1,12 @@
+"""
+=========================================================
+Task Planner Pro
+kanban_panel.py
+=========================================================
+Panel Kanban
+=========================================================
+"""
+
 from __future__ import annotations
 
 import tkinter as tk
@@ -1356,6 +1365,804 @@ class KanbanPanel(ttk.Frame):
         pass
             
             
+    # =====================================================
+    # DRAG & DROP
+    # =====================================================
+
+    def card_drag(
+
+        self,
+
+        action,
+
+        card,
+
+        event
+
+    ):
+
+        if action == "move":
+
+            self._drag_move(
+
+                card,
+
+                event
+
+            )
+
+        elif action == "drop":
+
+            self._drag_drop(
+
+                card,
+
+                event
+
+            )
+
+    # =====================================================
+    # DRAG MOVE
+    # =====================================================
+
+    def _drag_move(
+
+        self,
+
+        card,
+
+        event
+
+    ):
+
+        self.canvas.configure(
+
+            cursor="hand2"
+
+        )
+
+    # =====================================================
+    # DRAG DROP
+    # =====================================================
+
+    def _drag_drop(
+
+        self,
+
+        card,
+
+        event
+
+    ):
+
+        self.canvas.configure(
+
+            cursor=""
+
+        )
+
+        destino = self._column_from_position(
+
+            event.x_root,
+
+            event.y_root
+
+        )
+
+        if destino is None:
+
+            return
+
+        if destino.status == card.task.estado:
+
+            return
+
+        origen = self.columns.get(
+
+            card.task.estado
+
+        )
+
+        if origen:
+
+            origen.remove_card(
+
+                card.task.id
+
+            )
+
+        card.task.estado = destino.status
+
+        destino.add_card(
+
+            card.task
+
+        )
+
+        if self.task_change_callback:
+
+            self.task_change_callback(
+
+                card.task
+
+            )
+
+    # =====================================================
+    # LOCALIZAR COLUMNA
+    # =====================================================
+
+    def _column_from_position(
+
+        self,
+
+        x_root,
+
+        y_root
+
+    ):
+
+        widget = self.winfo_containing(
+
+            x_root,
+
+            y_root
+
+        )
+
+        while widget:
+
+            if isinstance(
+
+                widget,
+
+                KanbanColumn
+
+            ):
+
+                return widget
+
+            widget = widget.master
+
+        return None
+
+    # =====================================================
+    # MOVER TAREA
+    # =====================================================
+
+    def move_task(
+
+        self,
+
+        task_id,
+
+        new_status
+
+    ):
+
+        if new_status not in self.columns:
+
+            return
+
+        task = self.find_task(
+
+            task_id
+
+        )
+
+        if task is None:
+
+            return
+
+        if task.estado == new_status:
+
+            return
+
+        self.columns[task.estado].remove_card(
+
+            task.id
+
+        )
+
+        task.estado = new_status
+
+        self.columns[new_status].add_card(
+
+            task
+        )
+
+        if self.task_change_callback:
+
+            self.task_change_callback(
+
+                task
+
+            )
+
+    # =====================================================
+    # BUSCAR TAREA
+    # =====================================================
+
+    def find_task(
+
+        self,
+
+        task_id
+
+    ):
+
+        for task in self.tasks:
+
+            if task.id == task_id:
+
+                return task
+
+        return None
+
+    # =====================================================
+    # ACTUALIZAR TAREA
+    # =====================================================
+
+    def update_task(
+
+        self,
+
+        task
+
+    ):
+
+        actual = self.find_task(
+
+            task.id
+
+        )
+
+        if actual is None:
+
+            return
+
+        estado_anterior = actual.estado
+
+        actual.__dict__.update(
+
+            task.__dict__
+
+        )
+
+        if estado_anterior != task.estado:
+
+            self.refresh()
+
+            return
+
+        columna = self.columns.get(
+
+            task.estado
+
+        )
+
+        if columna:
+
+            columna.update_card(
+
+                task
+
+            )
+
+    # =====================================================
+    # AÑADIR TAREA
+    # =====================================================
+
+    def add_task(
+
+        self,
+
+        task
+
+    ):
+
+        self.tasks.append(
+
+            task
+
+        )
+
+        columna = self.columns.get(
+
+            task.estado
+
+        )
+
+        if columna:
+
+            columna.add_card(
+
+                task
+
+            )
+
+    # =====================================================
+    # ELIMINAR TAREA
+    # =====================================================
+
+    def remove_task(
+
+        self,
+
+        task_id
+
+    ):
+
+        task = self.find_task(
+
+            task_id
+
+        )
+
+        if task is None:
+
+            return
+
+        self.tasks.remove(
+
+            task
+
+        )
+
+        columna = self.columns.get(
+
+            task.estado
+
+        )
+
+        if columna:
+
+            columna.remove_card(
+
+                task.id
+
+            )
+
+    # =====================================================
+    # FILTRAR
+    # =====================================================
+
+    def filter_tasks(
+
+        self,
+
+        predicate
+
+    ):
+
+        for columna in self.columns.values():
+
+            columna.clear()
+
+        for task in filter(
+
+            predicate,
+
+            self.tasks
+
+        ):
+
+            self.columns[
+
+                task.estado
+
+            ].add_card(
+
+                task
+
+            )
+
+    # =====================================================
+    # LIMPIAR FILTRO
+    # =====================================================
+
+    def clear_filter(self):
+
+        self.refresh()
+
+    # =====================================================
+    # TOTAL
+    # =====================================================
+
+    def total_tasks(self):
+
+        return len(
+
+            self.tasks
+
+        )
+
+    # =====================================================
+    # TAREA SELECCIONADA
+    # =====================================================
+
+    def get_selected_task(self):
+
+        return self.selected_task
+        
+        
+    # =====================================================
+    # MENÚ CONTEXTUAL
+    # =====================================================
+
+    def create_context_menu(self):
+
+        self.context_menu = tk.Menu(
+
+            self,
+
+            tearoff=False
+
+        )
+
+        self.context_menu.add_command(
+
+            label="Abrir",
+
+            command=self.open_selected
+
+        )
+
+        self.context_menu.add_command(
+
+            label="Editar",
+
+            command=self.edit_selected
+
+        )
+
+        self.context_menu.add_separator()
+
+        self.context_menu.add_command(
+
+            label="Duplicar",
+
+            command=self.duplicate_selected
+
+        )
+
+        self.context_menu.add_command(
+
+            label="Finalizar",
+
+            command=self.complete_selected
+
+        )
+
+        self.context_menu.add_separator()
+
+        self.context_menu.add_command(
+
+            label="Eliminar",
+
+            command=self.delete_selected
+
+        )
+
+        self.canvas.bind(
+
+            "<Button-3>",
+
+            self.show_context_menu
+
+        )
+
+    # =====================================================
+    # MOSTRAR MENÚ
+    # =====================================================
+
+    def show_context_menu(
+
+        self,
+
+        event
+
+    ):
+
+        if self.selected_task is None:
+
+            return
+
+        self.context_menu.tk_popup(
+
+            event.x_root,
+
+            event.y_root
+
+        )
+
+    # =====================================================
+    # ABRIR
+    # =====================================================
+
+    def open_selected(self):
+
+        if self.selected_task is None:
+
+            return
+
+        if self.task_open_callback:
+
+            self.task_open_callback(
+
+                self.selected_task.id
+
+            )
+
+    # =====================================================
+    # EDITAR
+    # =====================================================
+
+    def edit_selected(self):
+
+        self.open_selected()
+
+    # =====================================================
+    # DUPLICAR
+    # =====================================================
+
+    def duplicate_selected(self):
+
+        if self.selected_task is None:
+
+            return
+
+        if hasattr(
+
+            self,
+
+            "duplicate_callback"
+
+        ):
+
+            self.duplicate_callback(
+
+                self.selected_task
+
+            )
+
+    # =====================================================
+    # FINALIZAR
+    # =====================================================
+
+    def complete_selected(self):
+
+        if self.selected_task is None:
+
+            return
+
+        self.selected_task.finalizar()
+
+        self.update_task(
+
+            self.selected_task
+
+        )
+
+        if self.task_change_callback:
+
+            self.task_change_callback(
+
+                self.selected_task
+
+            )
+
+    # =====================================================
+    # ELIMINAR
+    # =====================================================
+
+    def delete_selected(self):
+
+        if self.selected_task is None:
+
+            return
+
+        if hasattr(
+
+            self,
+
+            "delete_callback"
+
+        ):
+
+            self.delete_callback(
+
+                self.selected_task.id
+
+            )
+
+    # =====================================================
+    # CALLBACKS EXTRA
+    # =====================================================
+
+    def set_duplicate_callback(
+
+        self,
+
+        callback
+
+    ):
+
+        self.duplicate_callback = callback
+
+    def set_delete_callback(
+
+        self,
+
+        callback
+
+    ):
+
+        self.delete_callback = callback
+
+    # =====================================================
+    # EXPORTAR
+    # =====================================================
+
+    def export_tasks(self):
+
+        if hasattr(
+
+            self,
+
+            "export_callback"
+
+        ):
+
+            self.export_callback(
+
+                self.tasks
+
+            )
+
+    def set_export_callback(
+
+        self,
+
+        callback
+
+    ):
+
+        self.export_callback = callback
+
+    # =====================================================
+    # ATAJOS
+    # =====================================================
+
+    def register_shortcuts(self):
+
+        self.bind(
+
+            "<Delete>",
+
+            lambda e: self.delete_selected()
+
+        )
+
+        self.bind(
+
+            "<Return>",
+
+            lambda e: self.open_selected()
+
+        )
+
+        self.bind(
+
+            "<F2>",
+
+            lambda e: self.edit_selected()
+
+        )
+
+        self.bind(
+
+            "<Control-r>",
+
+            lambda e: self.refresh()
+
+        )
+
+    # =====================================================
+    # ENFOQUE
+    # =====================================================
+
+    def focus_panel(self):
+
+        self.canvas.focus_set()
+
+    # =====================================================
+    # LIMPIAR
+    # =====================================================
+
+    def clear(self):
+
+        self.selected_task = None
+
+        self.tasks.clear()
+
+        for column in self.columns.values():
+
+            column.clear()
+
+    # =====================================================
+    # RECARGAR
+    # =====================================================
+
+    def reload(
+
+        self,
+
+        tasks
+
+    ):
+
+        self.tasks = list(tasks)
+
+        self.refresh()
+
+    # =====================================================
+    # AUTOREFRESH
+    # =====================================================
+
+    def start_autorefresh(
+
+        self,
+
+        interval=60000
+
+    ):
+
+        self.refresh()
+
+        self.after(
+
+            interval,
+
+            lambda: self.start_autorefresh(
+
+                interval
+
+            )
+
+        )
+
+    # =====================================================
+    # REDIMENSIONADO
+    # =====================================================
+
+    def on_resize(
+
+        self,
+
+        event=None
+
+    ):
+
+        self.update_idletasks()
+
+    # =====================================================
+    # DESTRUCTOR
+    # =====================================================
+
+    def destroy(self):
+
+        self.clear()
+
+        try:
+
+            self.canvas.destroy()
+
+        except Exception:
+
+            pass
+
+        super().destroy()
+
             
             
             
