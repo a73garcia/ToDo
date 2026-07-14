@@ -415,3 +415,195 @@ class MetricsManager:
         
         
         
+    # =====================================================
+    # PRODUCTIVIDAD POR RESPONSABLE
+    # =====================================================
+
+    def owner_productivity(self):
+
+        datos = {}
+
+        for tarea in self.tasks:
+
+            responsable = tarea.responsable or "Sin asignar"
+
+            if responsable not in datos:
+
+                datos[responsable] = {
+
+                    "total": 0,
+
+                    "finalizadas": 0,
+
+                    "avance": 0
+
+                }
+
+            datos[responsable]["total"] += 1
+
+            datos[responsable]["avance"] += tarea.avance
+
+            if tarea.estado == STATUS_DONE:
+
+                datos[responsable]["finalizadas"] += 1
+
+        for responsable in datos:
+
+            total = datos[responsable]["total"]
+
+            if total:
+
+                datos[responsable]["avance"] = round(
+
+                    datos[responsable]["avance"] / total,
+
+                    1
+
+                )
+
+        return datos
+
+    # =====================================================
+    # PRODUCTIVIDAD POR CATEGORÍA
+    # =====================================================
+
+    def category_productivity(self):
+
+        datos = {}
+
+        for tarea in self.tasks:
+
+            categoria = tarea.categoria or "Sin categoría"
+
+            if categoria not in datos:
+
+                datos[categoria] = {
+
+                    "total": 0,
+
+                    "avance": 0
+
+                }
+
+            datos[categoria]["total"] += 1
+
+            datos[categoria]["avance"] += tarea.avance
+
+        for categoria in datos:
+
+            total = datos[categoria]["total"]
+
+            if total:
+
+                datos[categoria]["avance"] = round(
+                    datos[categoria]["avance"] / total,
+                    1
+                )
+
+        return datos
+
+    # =====================================================
+    # RESUMEN PARA DASHBOARD
+    # =====================================================
+
+    def dashboard_data(self):
+
+        return {
+
+            "kpi": self.kpi(),
+
+            "estado": dict(self.tasks_by_status()),
+
+            "prioridad": dict(self.tasks_by_priority()),
+
+            "categoria": dict(self.tasks_by_category()),
+
+            "responsable": dict(self.tasks_by_owner()),
+
+            "productividad": self.owner_productivity()
+
+        }
+
+    # =====================================================
+    # DATOS PARA POWER BI
+    # =====================================================
+
+    def powerbi_dataset(self):
+
+        filas = []
+
+        for tarea in self.tasks:
+
+            filas.append({
+
+                "id": tarea.id,
+
+                "titulo": tarea.titulo,
+
+                "estado": tarea.estado,
+
+                "prioridad": tarea.prioridad,
+
+                "responsable": tarea.responsable,
+
+                "categoria": tarea.categoria,
+
+                "avance": tarea.avance,
+
+                "fecha_inicio": tarea.fecha_inicio,
+
+                "fecha_prevista": tarea.fecha_prevista,
+
+                "retrasada": tarea.esta_retrasada()
+
+            })
+
+        return filas
+
+    # =====================================================
+    # RESUMEN EJECUTIVO
+    # =====================================================
+
+    def executive_summary(self):
+
+        return {
+
+            "fecha": datetime.now(),
+
+            "total_tareas": self.total_tasks(),
+
+            "tareas_activas": self.active_tasks(),
+
+            "tareas_finalizadas": self.completed_tasks(),
+
+            "tareas_retrasadas": self.delayed_tasks(),
+
+            "avance_global": self.global_progress(),
+
+            "responsables": len(self.tasks_by_owner()),
+
+            "categorias": len(self.tasks_by_category())
+
+        }
+
+    # =====================================================
+    # MÉTRICAS COMPLETAS
+    # =====================================================
+
+    def full_report(self):
+
+        return {
+
+            "kpi": self.kpi(),
+
+            "dashboard": self.dashboard_data(),
+
+            "powerbi": self.powerbi_dataset(),
+
+            "owners": self.owner_productivity(),
+
+            "categories": self.category_productivity(),
+
+            "summary": self.executive_summary()
+
+        }
