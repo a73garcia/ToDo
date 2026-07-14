@@ -979,10 +979,808 @@ class MainWindow(tk.Tk):
             event.y_root
 
         )
+
+    # ======================================================
+    # NUEVA TAREA
+    # ======================================================
+
+    def new_task(self):
+
+        dialog = TaskDialog(
+
+            self,
+
+            title="Nueva tarea"
+
+        )
+
+        if not dialog.result:
+
+            return
+
+        task = dialog.result
+
+        self.excel.add_task(task)
+
+        self.excel.refresh()
+
+        self.refresh()
+
+        self.status.set(
+
+            "Nueva tarea creada"
+
+        )
+
+    # ======================================================
+    # EDITAR TAREA
+    # ======================================================
+
+    def edit_task(self):
+
+        if self.selected_task is None:
+
+            messagebox.showwarning(
+
+                APP_NAME,
+
+                "Seleccione una tarea."
+
+            )
+
+            return
+
+        dialog = TaskDialog(
+
+            self,
+
+            task=self.selected_task,
+
+            title="Editar tarea"
+
+        )
+
+        if not dialog.result:
+
+            return
+
+        self.excel.update_task(
+
+            dialog.result
+
+        )
+
+        self.excel.add_history(
+
+            dialog.result.id,
+
+            "Usuario",
+
+            dialog.result.avance,
+
+            "Tarea modificada"
+
+        )
+
+        self.excel.refresh()
+
+        self.refresh()
+
+        self.status.set(
+
+            "Tarea actualizada"
+
+        )
+
+    # ======================================================
+    # ELIMINAR TAREA
+    # ======================================================
+
+    def delete_task(self):
+
+        if self.selected_task is None:
+
+            return
+
+        respuesta = messagebox.askyesno(
+
+            APP_NAME,
+
+            "¿Desea eliminar la tarea?"
+
+        )
+
+        if not respuesta:
+
+            return
+
+        self.excel.delete_task(
+
+            self.selected_task.id
+
+        )
+
+        self.refresh()
+
+        self.status.set(
+
+            "Tarea eliminada"
+
+        )
+
+    # ======================================================
+    # DUPLICAR TAREA
+    # ======================================================
+
+    def duplicate_task(self):
+
+        if self.selected_task is None:
+
+            return
+
+        tarea = self.selected_task
+
+        nueva = type(tarea)()
+
+        nueva.titulo = tarea.titulo
+
+        nueva.descripcion = tarea.descripcion
+
+        nueva.responsable = tarea.responsable
+
+        nueva.estado = tarea.estado
+
+        nueva.prioridad = tarea.prioridad
+
+        nueva.categoria = tarea.categoria
+
+        nueva.etiquetas = tarea.etiquetas
+
+        nueva.fecha_inicio = tarea.fecha_inicio
+
+        nueva.fecha_prevista = tarea.fecha_prevista
+
+        nueva.fecha_creacion = datetime.now().strftime(
+
+            DATE_FORMAT
+
+        )
+
+        nueva.avance = 0
+
+        nueva.comentarios = ""
+
+        self.excel.add_task(
+
+            nueva
+
+        )
+
+        self.refresh()
+
+    # ======================================================
+    # BUSCADOR
+    # ======================================================
+
+    def search_tasks(self):
+
+        texto = self.search_text.get().strip()
+
+        if texto == "":
+
+            self.load_tasks()
+
+        else:
+
+            self.tasks = self.excel.search_tasks(
+
+                texto
+
+            )
+
+        self.refresh_table()
+
+    # ======================================================
+    # FILTRO POR ESTADO
+    # ======================================================
+
+    def filter_status(
+
+        self,
+
+        estado
+
+    ):
+
+        self.tasks = self.excel.tasks_by_status(
+
+            estado
+
+        )
+
+        self.refresh_table()
+
+        self.status.set(
+
+            f"{len(self.tasks)} tareas"
+
+        )
+
+    # ======================================================
+    # FILTRO RESPONSABLE
+    # ======================================================
+
+    def filter_owner(
+
+        self,
+
+        responsable
+
+    ):
+
+        self.tasks = self.excel.tasks_by_owner(
+
+            responsable
+
+        )
+
+        self.refresh_table()
+
+    # ======================================================
+    # FILTRO CATEGORÍA
+    # ======================================================
+
+    def filter_category(
+
+        self,
+
+        categoria
+
+    ):
+
+        self.tasks = self.excel.tasks_by_category(
+
+            categoria
+
+        )
+
+        self.refresh_table()
+
+    # ======================================================
+    # RESETEAR FILTROS
+    # ======================================================
+
+    def clear_filters(self):
+
+        self.search_text.set("")
+
+        self.load_tasks()
+
+        self.refresh_table()
+
+        self.status.set(
+
+            "Filtros eliminados"
+
+        )
+
+    # ======================================================
+    # ACTUALIZAR PANEL DE NOTIFICACIONES
+    # ======================================================
+
+    def show_notifications(self):
+
+        self.notification_list.delete(
+
+            0,
+
+            tk.END
+
+        )
+
+        for mensaje in self.notifications.ui_messages():
+
+            self.notification_list.insert(
+
+                tk.END,
+
+                mensaje
+
+            )
         
         
+    # ======================================================
+    # REFRESCAR DASHBOARD
+    # ======================================================
+
+    def refresh_dashboard(self):
+
+        try:
+
+            datos = self.metrics.dashboard_data()
+
+            if hasattr(self.dashboard, "update_data"):
+
+                self.dashboard.update_data(datos)
+
+        except Exception as ex:
+
+            print("Dashboard:", ex)
+
+    # ======================================================
+    # REFRESCAR CALENDARIO
+    # ======================================================
+
+    def refresh_calendar(self):
+
+        try:
+
+            if hasattr(self.calendar, "load_tasks"):
+
+                self.calendar.load_tasks(self.tasks)
+
+        except Exception as ex:
+
+            print("Calendar:", ex)
+
+    # ======================================================
+    # REFRESCAR KANBAN
+    # ======================================================
+
+    def refresh_kanban(self):
+
+        try:
+
+            if hasattr(self.kanban, "load_tasks"):
+
+                self.kanban.load_tasks(self.tasks)
+
+        except Exception as ex:
+
+            print("Kanban:", ex)
+
+    # ======================================================
+    # REFRESCAR GANTT
+    # ======================================================
+
+    def refresh_gantt(self):
+
+        try:
+
+            if hasattr(self.gantt, "load_tasks"):
+
+                self.gantt.load_tasks(self.tasks)
+
+        except Exception as ex:
+
+            print("Gantt:", ex)
+
+    # ======================================================
+    # EXPORTAR EXCEL
+    # ======================================================
+
+    def export_excel(self):
+
+        fichero = self.report.export_excel()
+
+        messagebox.showinfo(
+
+            APP_NAME,
+
+            f"Informe generado\n\n{fichero}"
+
+        )
+
+    # ======================================================
+    # EXPORTAR CSV
+    # ======================================================
+
+    def export_csv(self):
+
+        fichero = self.report.export_csv()
+
+        messagebox.showinfo(
+
+            APP_NAME,
+
+            f"Informe generado\n\n{fichero}"
+
+        )
+
+    # ======================================================
+    # EXPORTAR PDF
+    # ======================================================
+
+    def export_pdf(self):
+
+        fichero = self.report.export_pdf()
+
+        messagebox.showinfo(
+
+            APP_NAME,
+
+            f"Informe generado\n\n{fichero}"
+
+        )
+
+    # ======================================================
+    # EXPORTAR TODO
+    # ======================================================
+
+    def export_all_reports(self):
+
+        self.report.export_all()
+
+        messagebox.showinfo(
+
+            APP_NAME,
+
+            "Todos los informes han sido exportados."
+
+        )
+
+    # ======================================================
+    # BACKUP
+    # ======================================================
+
+    def create_backup(self):
+
+        fichero = self.backup.create_zip_backup()
+
+        messagebox.showinfo(
+
+            APP_NAME,
+
+            f"Backup creado\n\n{fichero}"
+
+        )
+
+    # ======================================================
+    # RESTAURAR BACKUP
+    # ======================================================
+
+    def restore_backup(self):
+
+        fichero = filedialog.askopenfilename(
+
+            title="Seleccionar Backup",
+
+            filetypes=[
+
+                ("Backups", "*.zip *.xlsx")
+
+            ]
+
+        )
+
+        if not fichero:
+
+            return
+
+        self.backup.restore(fichero)
+
+        self.refresh()
+
+        messagebox.showinfo(
+
+            APP_NAME,
+
+            "Backup restaurado correctamente."
+
+        )
+
+    # ======================================================
+    # REFRESCAR POWER BI
+    # ======================================================
+
+    def refresh_powerbi(self):
+
+        self.powerbi.refresh_all()
+
+        messagebox.showinfo(
+
+            APP_NAME,
+
+            "Dataset actualizado."
+
+        )
+
+    # ======================================================
+    # ACTUALIZACIÓN COMPLETA
+    # ======================================================
+
+    def full_refresh(self):
+
+        self.excel.refresh()
+
+        self.load_tasks()
+
+        self.refresh_dashboard()
+
+        self.refresh_calendar()
+
+        self.refresh_kanban()
+
+        self.refresh_gantt()
+
+        self.refresh_table()
+
+        self.show_notifications()
+
+        self.status.set(
+
+            "Aplicación sincronizada"
+
+        )
+
+    # ======================================================
+    # INFORMACIÓN DEL PROYECTO
+    # ======================================================
+
+    def project_info(self):
+
+        datos = self.metrics.executive_summary()
+
+        texto = f"""
+
+Task Planner Pro
+
+Versión: {APP_VERSION}
+
+Total tareas: {datos['total_tareas']}
+
+Tareas activas: {datos['tareas_activas']}
+
+Finalizadas: {datos['tareas_finalizadas']}
+
+Retrasadas: {datos['tareas_retrasadas']}
+
+Avance global: {datos['avance_global']}%
+
+"""
+
+        messagebox.showinfo(
+
+            "Información",
+
+            texto
+
+        )
+        
+    # ======================================================
+    # ATAJOS DE TECLADO
+    # ======================================================
+
+    def register_shortcuts(self):
+
+        self.bind("<Control-n>", lambda e: self.new_task())
+
+        self.bind("<Control-e>", lambda e: self.edit_task())
+
+        self.bind("<Delete>", lambda e: self.delete_task())
+
+        self.bind("<F5>", lambda e: self.full_refresh())
+
+        self.bind("<Control-f>", lambda e: self.focus_search())
+
+        self.bind("<Escape>", lambda e: self.clear_filters())
+
+    # ======================================================
+    # BUSCADOR
+    # ======================================================
+
+    def focus_search(self):
+
+        self.search_entry.focus_set()
+
+        self.search_entry.select_range(0, tk.END)
+
+    # ======================================================
+    # FAVORITOS
+    # ======================================================
+
+    def add_favorite(self):
+
+        if self.selected_task is None:
+
+            return
+
+        self.selected_task.favorita = True
+
+        self.excel.update_task(
+
+            self.selected_task
+
+        )
+
+        self.refresh()
+
+    def remove_favorite(self):
+
+        if self.selected_task is None:
+
+            return
+
+        self.selected_task.favorita = False
+
+        self.excel.update_task(
+
+            self.selected_task
+
+        )
+
+        self.refresh()
+
+    def show_favorites(self):
+
+        self.tasks = [
+
+            t
+
+            for t in self.excel.load_tasks()
+
+            if getattr(
+
+                t,
+
+                "favorita",
+
+                False
+
+            )
+
+        ]
+
+        self.refresh_table()
+
+    # ======================================================
+    # ETIQUETAS
+    # ======================================================
+
+    def filter_tag(
+
+        self,
+
+        tag
+
+    ):
+
+        self.tasks = [
+
+            t
+
+            for t in self.excel.load_tasks()
+
+            if tag.lower()
+
+            in t.etiquetas.lower()
+
+        ]
+
+        self.refresh_table()
+
+    # ======================================================
+    # ESTADÍSTICAS
+    # ======================================================
+
+    def update_status_statistics(self):
+
+        datos = self.metrics.kpi()
+
+        self.status.set(
+
+            f"Tareas: {datos['total']}   "
+
+            f"Pendientes: {datos['pendientes']}   "
+
+            f"Curso: {datos['en_curso']}   "
+
+            f"Finalizadas: {datos['finalizadas']}"
+
+        )
+
+    # ======================================================
+    # SINCRONIZACIÓN
+    # ======================================================
+
+    def synchronize_panels(self):
+
+        self.refresh_dashboard()
+
+        self.refresh_calendar()
+
+        self.refresh_kanban()
+
+        self.refresh_gantt()
+
+        self.refresh_table()
+
+        self.show_notifications()
+
+        self.update_status_statistics()
+
+    # ======================================================
+    # CAMBIO DE PESTAÑA
+    # ======================================================
+
+    def on_tab_changed(
+
+        self,
+
+        event=None
+
+    ):
+
+        indice = self.notebook.index(
+
+            self.notebook.select()
+
+        )
+
+        if indice == 0:
+
+            self.refresh_dashboard()
+
+        elif indice == 1:
+
+            self.refresh_calendar()
+
+        elif indice == 2:
+
+            self.refresh_kanban()
+
+        elif indice == 3:
+
+            self.refresh_gantt()
+
+        elif indice == 4:
+
+            self.refresh_table()
+
+    # ======================================================
+    # CERRAR
+    # ======================================================
+
+    def on_close(self):
+
+        try:
+
+            self.backup.maintenance()
+
+        except Exception:
+
+            pass
+
+        self.destroy()
+
+    # ======================================================
+    # INICIALIZACIÓN FINAL
+    # ======================================================
+
+    def initialize(self):
+
+        self.register_shortcuts()
+
+        self.notebook.bind(
+
+            "<<NotebookTabChanged>>",
+
+            self.on_tab_changed
+
+        )
+
+        self.protocol(
+
+            "WM_DELETE_WINDOW",
+
+            self.on_close
+
+        )
+
+        self.full_refresh()
         
         
+
         
         
         
