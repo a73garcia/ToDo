@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ToDo - Gestor de tareas</title>
+
+    <link rel="stylesheet" href="/css/estilos.css">
+
+    <script defer src="/js/app.js"></script>
+    <script defer src="/js/dashboard.js"></script>
+    <script defer src="/js/calendar.js"></script>
+</head>
+
+<body>
+
+<div id="app" class="app-shell">
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">T</div>
+
+            <div>
+                <h1>ToDo</h1>
+                <span>Gestión de tareas</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <button
+                class="nav-item active"
+                type="button"
+                data-view="dashboard"
+            >
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </button>
+
+            <button
+                class="nav-item"
+                type="button"
+                data-view="tasks"
+            >
+                <span class="nav-icon">✓</span>
+                <span>Tareas</span>
+            </button>
+
+            <button
+                class="nav-item"
+                type="button"
+                data-view="calendar"
+            >
+                <span class="nav-icon">◫</span>
+                <span>Calendario</span>
+            </button>
+
+            <button
+                class="nav-item"
+                type="button"
+                data-view="reports"
+            >
+                <span class="nav-icon">◩</span>
+                <span>Informes</span>
+            </button>
+
+            <button
+                class="nav-item"
+                type="button"
+                data-view="settings"
+            >
+                <span class="nav-icon">⚙</span>
+                <span>Configuración</span>
+            </button>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <span>ToDo v2.0</span>
+        </div>
+
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <h2 id="pageTitle">Dashboard</h2>
+                <p id="currentDate"></p>
+            </div>
+
+            <div class="topbar-actions">
+
+                <label class="global-search">
+                    <span>⌕</span>
+
+                    <input
+                        id="txtSearch"
+                        type="search"
+                        placeholder="Buscar tareas..."
+                        autocomplete="off"
+                    >
+                </label>
+
+                <button
+                    id="btnNewTask"
+                    class="btn btn-primary"
+                    type="button"
+                >
+                    + Nueva tarea
+                </button>
+
+            </div>
+
+        </header>
+
+        <!-- DASHBOARD -->
+
+        <section id="dashboard" class="view active">
+
+            <div class="section-heading">
+                <div>
+                    <h3>Resumen general</h3>
+                    <p>Estado actual del trabajo y próximos vencimientos.</p>
+                </div>
+            </div>
+
+            <div class="kpi-grid">
+
+                <button
+                    class="kpi-card"
+                    type="button"
+                    data-dashboard-filter="all"
+                >
+                    <span class="kpi-label">Total</span>
+                    <strong id="totalTasks">0</strong>
+                    <small>Todas las tareas</small>
+                </button>
+
+                <button
+                    class="kpi-card status-pending"
+                    type="button"
+                    data-dashboard-filter="Pendiente"
+                >
+                    <span class="kpi-label">Pendientes</span>
+                    <strong id="pendingTasks">0</strong>
+                    <small>Sin comenzar</small>
+                </button>
+
+                <button
+                    class="kpi-card status-running"
+                    type="button"
+                    data-dashboard-filter="En curso"
+                >
+                    <span class="kpi-label">En curso</span>
+                    <strong id="runningTasks">0</strong>
+                    <small>Trabajo activo</small>
+                </button>
+
+                <button
+                    class="kpi-card status-blocked"
+                    type="button"
+                    data-dashboard-filter="Bloqueada"
+                >
+                    <span class="kpi-label">Bloqueadas</span>
+                    <strong id="blockedTasks">0</strong>
+                    <small>Requieren atención</small>
+                </button>
+
+                <button
+                    class="kpi-card status-finished"
+                    type="button"
+                    data-dashboard-filter="Finalizada"
+                >
+                    <span class="kpi-label">Finalizadas</span>
+                    <strong id="finishedTasks">0</strong>
+                    <small>Completadas</small>
+                </button>
+
+                <button
+                    class="kpi-card status-cancelled"
+                    type="button"
+                    data-dashboard-filter="Cancelada"
+                >
+                    <span class="kpi-label">Canceladas</span>
+                    <strong id="cancelledTasks">0</strong>
+                    <small>No continúan</small>
+                </button>
+
+                <button
+                    class="kpi-card status-overdue"
+                    type="button"
+                    data-dashboard-filter="overdue"
+                >
+                    <span class="kpi-label">Retrasadas</span>
+                    <strong id="overdueTasks">0</strong>
+                    <small>Fuera de plazo</small>
+                </button>
+
+                <button
+                    class="kpi-card"
+                    type="button"
+                    data-dashboard-filter="progress"
+                >
+                    <span class="kpi-label">Avance medio</span>
+                    <strong id="averageProgress">0%</strong>
+                    <small>Progreso global</small>
+                </button>
+
+            </div>
+
+            <div class="dashboard-grid">
+
+                <article class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Distribución por estado</h3>
+                            <p>Vista rápida de la carga actual.</p>
+                        </div>
+                    </div>
+
+                    <div id="statusChart" class="chart-placeholder">
+                        Sin datos
+                    </div>
+                </article>
+
+                <article class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Próximos vencimientos</h3>
+                            <p>Tareas previstas para los próximos días.</p>
+                        </div>
+                    </div>
+
+                    <div id="upcomingTasks" class="stack-list">
+                        <p class="empty-state">No hay tareas próximas.</p>
+                    </div>
+                </article>
+
+                <article class="panel panel-wide">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Actividad reciente</h3>
+                            <p>Últimos cambios registrados.</p>
+                        </div>
+                    </div>
+
+                    <div id="recentActivity" class="activity-list">
+                        <p class="empty-state">No hay actividad registrada.</p>
+                    </div>
+                </article>
+
+            </div>
+
+        </section>
+
+        <!-- TAREAS -->
+
+        <section id="tasks" class="view">
+
+            <div class="section-heading">
+                <div>
+                    <h3>Gestión de tareas</h3>
+                    <p>Consulta, filtra y actualiza el trabajo.</p>
+                </div>
+            </div>
+
+            <div class="filters-bar">
+
+                <select id="filterStatus">
+                    <option value="">Todos los estados</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En curso">En curso</option>
+                    <option value="Bloqueada">Bloqueada</option>
+                    <option value="Finalizada">Finalizada</option>
+                    <option value="Cancelada">Cancelada</option>
+                </select>
+
+                <select id="filterPriority">
+                    <option value="">Todas las prioridades</option>
+                    <option value="Baja">Baja</option>
+                    <option value="Media">Media</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Crítica">Crítica</option>
+                </select>
+
+                <select id="filterResponsible">
+                    <option value="">Todos los responsables</option>
+                </select>
+
+                <select id="sortTasks">
+                    <option value="id-desc">Más recientes</option>
+                    <option value="id-asc">Más antiguas</option>
+                    <option value="title-asc">Título A-Z</option>
+                    <option value="date-asc">Fecha prevista</option>
+                    <option value="progress-desc">Mayor avance</option>
+                </select>
+
+                <button
+                    id="btnClearFilters"
+                    class="btn btn-secondary"
+                    type="button"
+                >
+                    Limpiar
+                </button>
+
+                <button
+                    id="btnExportCsv"
+                    class="btn btn-secondary"
+                    type="button"
+                >
+                    Exportar CSV
+                </button>
+
+            </div>
+
+            <div class="table-wrapper">
+
+                <table id="taskTable">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tarea</th>
+                            <th>Responsable</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                            <th>Inicio</th>
+                            <th>Prevista</th>
+                            <th>Avance</th>
+                            <th>Comentarios</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- CALENDARIO -->
+
+        <section id="calendar" class="view">
+
+            <div class="section-heading">
+                <div>
+                    <h3>Calendario</h3>
+                    <p>Planificación mensual y vencimientos.</p>
+                </div>
+            </div>
+
+            <div class="calendar-layout">
+
+                <article class="panel calendar-panel">
+
+                    <div class="calendar-toolbar">
+
+                        <div class="calendar-navigation">
+                            <button
+                                id="calendarPrev"
+                                type="button"
+                                class="icon-button"
+                                aria-label="Mes anterior"
+                            >
+                                ‹
+                            </button>
+
+                            <button
+                                id="calendarToday"
+                                type="button"
+                                class="btn btn-secondary"
+                            >
+                                Hoy
+                            </button>
+
+                            <button
+                                id="calendarNext"
+                                type="button"
+                                class="icon-button"
+                                aria-label="Mes siguiente"
+                            >
+                                ›
+                            </button>
+                        </div>
+
+                        <h3 id="calendarTitle">Calendario</h3>
+
+                    </div>
+
+                    <div class="calendar-weekdays">
+                        <span>Lunes</span>
+                        <span>Martes</span>
+                        <span>Miércoles</span>
+                        <span>Jueves</span>
+                        <span>Viernes</span>
+                        <span>Sábado</span>
+                        <span>Domingo</span>
+                    </div>
+
+                    <div id="calendarGrid" class="calendar-grid"></div>
+
+                </article>
+
+                <aside class="panel calendar-summary">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Resumen del mes</h3>
+                            <p id="calendarSummaryTitle">Sin datos</p>
+                        </div>
+                    </div>
+
+                    <div class="summary-list">
+                        <div>
+                            <span>Total</span>
+                            <strong id="calendarTotal">0</strong>
+                        </div>
+
+                        <div>
+                            <span>Pendientes</span>
+                            <strong id="calendarPending">0</strong>
+                        </div>
+
+                        <div>
+                            <span>En curso</span>
+                            <strong id="calendarRunning">0</strong>
+                        </div>
+
+                        <div>
+                            <span>Bloqueadas</span>
+                            <strong id="calendarBlocked">0</strong>
+                        </div>
+
+                        <div>
+                            <span>Finalizadas</span>
+                            <strong id="calendarFinished">0</strong>
+                        </div>
+                    </div>
+
+                    <div class="selected-day">
+
+                        <h4 id="selectedDayTitle">
+                            Selecciona un día
+                        </h4>
+
+                        <div id="selectedDayTasks">
+                            <p class="empty-state">
+                                No hay un día seleccionado.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </section>
+
+        <!-- INFORMES -->
+
+        <section id="reports" class="view">
+
+            <div class="section-heading">
+                <div>
+                    <h3>Informes</h3>
+                    <p>Indicadores y exportaciones del proyecto.</p>
+                </div>
+            </div>
+
+            <article class="panel">
+                <p class="empty-state">
+                    La sección de informes se ampliará en la siguiente fase.
+                </p>
+            </article>
+
+        </section>
+
+        <!-- CONFIGURACIÓN -->
+
+        <section id="settings" class="view">
+
+            <div class="section-heading">
+                <div>
+                    <h3>Configuración</h3>
+                    <p>Preferencias generales de la aplicación.</p>
+                </div>
+            </div>
+
+            <article class="panel settings-panel">
+
+                <label>
+                    <span>Tema</span>
+
+                    <select id="settingTheme">
+                        <option value="light">Claro</option>
+                        <option value="dark">Oscuro</option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>Copias de seguridad máximas</span>
+
+                    <input
+                        id="settingBackups"
+                        type="number"
+                        min="1"
+                        max="100"
+                        value="20"
+                    >
+                </label>
+
+            </article>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- MODAL TAREA -->
+
+<div id="taskModal" class="modal hidden">
+
+    <div class="modal-dialog modal-large">
+
+        <div class="modal-header">
+
+            <div>
+                <h2 id="taskModalTitle">Nueva tarea</h2>
+                <p>Crea o actualiza la información de la tarea.</p>
+            </div>
+
+            <button
+                id="btnCloseTaskModal"
+                class="icon-button"
+                type="button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <form id="taskForm">
+
+            <div class="form-grid">
+
+                <label class="field field-full">
+                    <span>Título *</span>
+                    <input id="titulo" maxlength="200" required>
+                </label>
+
+                <label class="field field-full">
+                    <span>Descripción</span>
+                    <textarea
+                        id="descripcion"
+                        rows="4"
+                        maxlength="5000"
+                    ></textarea>
+                </label>
+
+                <label class="field">
+                    <span>Responsable</span>
+                    <input id="responsable" maxlength="100">
+                </label>
+
+                <label class="field">
+                    <span>Prioridad</span>
+
+                    <select id="prioridad">
+                        <option value="Baja">Baja</option>
+                        <option value="Media" selected>Media</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Crítica">Crítica</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>Estado</span>
+
+                    <select id="estado">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En curso">En curso</option>
+                        <option value="Bloqueada">Bloqueada</option>
+                        <option value="Finalizada">Finalizada</option>
+                        <option value="Cancelada">Cancelada</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>Avance</span>
+
+                    <div class="progress-edit">
+                        <input
+                            id="avance"
+                            type="range"
+                            min="0"
+                            max="100"
+                            value="0"
+                        >
+
+                        <output id="avanceOutput">0%</output>
+                    </div>
+                </label>
+
+                <label class="field">
+                    <span>Fecha de inicio</span>
+                    <input id="fechaInicio" type="date">
+                </label>
+
+                <label class="field">
+                    <span>Fecha prevista</span>
+                    <input id="fechaPrevista" type="date">
+                </label>
+
+                <label class="field field-full">
+                    <span>Observaciones</span>
+                    <textarea
+                        id="observaciones"
+                        rows="3"
+                        maxlength="5000"
+                    ></textarea>
+                </label>
+
+            </div>
+
+            <div class="modal-actions">
+
+                <button
+                    id="btnCancel"
+                    class="btn btn-secondary"
+                    type="button"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                >
+                    Guardar tarea
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- MODAL COMENTARIOS -->
+
+<div id="commentsModal" class="modal hidden">
+
+    <div class="modal-dialog comments-dialog">
+
+        <div class="modal-header">
+
+            <div>
+                <h2>Seguimiento y comentarios</h2>
+                <p id="commentsTaskTitle"></p>
+            </div>
+
+            <button
+                id="btnCloseCommentsModal"
+                class="icon-button"
+                type="button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div id="commentsList" class="comments-list">
+            <p class="empty-state">No hay comentarios.</p>
+        </div>
+
+        <form id="commentForm" class="comment-form">
+
+            <label class="field">
+                <span>Autor</span>
+                <input id="commentAuthor" maxlength="100">
+            </label>
+
+            <label class="field field-full">
+                <span>Comentario</span>
+                <textarea
+                    id="commentText"
+                    rows="4"
+                    maxlength="2000"
+                    required
+                ></textarea>
+            </label>
+
+            <div class="modal-actions">
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                >
+                    Añadir comentario
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div id="notify" class="notify hidden"></div>
+
+</body>
+</html>
