@@ -1,94 +1,71 @@
-"""
-src/validators.py
-Funciones de validación para el proyecto ToDo.
-"""
+from typing import Any
 
-from datetime import datetime
-
-VALID_STATES = (
-    "Pendiente",
-    "En curso",
-    "Bloqueada",
-    "Finalizada",
-    "Cancelada",
-)
-
-VALID_PRIORITIES = (
-    "Baja",
-    "Media",
-    "Alta",
-    "Crítica",
-)
+from src.models import Task, VALID_PRIORITIES, VALID_STATES, normalize_date
 
 
-def validate_required(value, field_name):
-    if value is None or str(value).strip() == "":
-        raise ValueError(f'El campo "{field_name}" es obligatorio.')
-    return True
-
-
-def validate_date(value, field_name="Fecha", fmt="%Y-%m-%d"):
-    if value in ("", None):
-        return True
+def validate_identifier(value: Any) -> int:
     try:
-        datetime.strptime(str(value), fmt)
-    except ValueError as exc:
-        raise ValueError(
-            f'{field_name} debe tener el formato {fmt}.'
-        ) from exc
+        identifier = int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("ID no válido.") from exc
+    if identifier <= 0:
+        raise ValueError("ID no válido.")
+    return identifier
+
+
+def validate_task(task: Task) -> bool:
+    task.validate()
     return True
 
 
-def validate_state(state):
-    if state not in VALID_STATES:
-        raise ValueError(
-            f"Estado no válido: {state}"
-        )
-    return True
+def validate_task_payload(data: dict, partial: bool = False) -> dict:
+    if not isinstance(data, dict):
+        raise ValueError("El cuerpo debe ser un objeto JSON.")
+
+    allowed = {
+        "titulo", "descripcion", "responsable", "prioridad", "estado",
+        "fecha_creacion", "fecha_inicio", "fecha_prevista", "fecha",
+        "fecha_finalizacion", "avance", "observaciones", "etiquetas",
+        "comentarios", "favorito", "recordatorio", "proyecto",
+        "tiempo_estimado", "tiempo_empleado",
+    }
+    result = {key: value for key, value in data.items() if key in allowed}
+
+    if not partial and not str(result.get("titulo", "")).strip():
+        raise ValueError("El título es obligatorio.")
+
+    if "prioridad" in result and result["prioridad"] not in VALID_PRIORITIES:
+        raise ValueError("Prioridad no válida.")
+
+    if "estado" in result and result["estado"] not in VALID_STATES:
+        raise ValueError("Estado no válido.")
+
+    if "avance" in result:
+        result["avance"] = int(result["avance"])
+        if not 0 <= result["avance"] <= 100:
+            raise ValueError("El avance debe estar entre 0 y 100.")
+
+    for key in (
+        "fecha_creacion", "fecha_inicio", "fecha_prevista", "fecha",
+        "fecha_finalizacion", "recordatorio",
+    ):
+        if key in result:
+            result[key] = normalize_date(result[key])
+
+    return result
 
 
-def validate_priority(priority):
-    if priority not in VALID_PRIORITIES:
-        raise ValueError(
-            f"Prioridad no válida: {priority}"
-        )
-    return True
+def validate_comment_payload(data: dict) -> dict:
+    if not isinstance(data, dict):
+        raise ValueError("Comentario no válido.")
 
+    text = str(data.get("text", "")).strip()
+    author = str(data.get("author", "Usuario")).strip() or "Usuario"
 
-def validate_progress(progress):
-    try:
-        progress = int(progress)
-    except Exception as exc:
-        raise ValueError("El avance debe ser un número entero.") from exc
+    if not text:
+        raise ValueError("El comentario es obligatorio.")
 
-    if not 0 <= progress <= 100:
-        raise ValueError("El avance debe estar entre 0 y 100.")
-
-    return True
-
-
-def validate_responsable(nombre):
-    if nombre is None:
-        return True
-
-    nombre = str(nombre).strip()
-
-    if len(nombre) > 100:
-        raise ValueError(
-            "El nombre del responsable supera los 100 caracteres."
-        )
-
-    return True
-
-
-def validate_task(task):
-    validate_required(task.titulo, "Título")
-    validate_priority(task.prioridad)
-    validate_state(task.estado)
-    validate_progress(task.avance)
-    validate_responsable(task.responsable)
-    validate_date(task.fecha_creacion, "Fecha creación")
-    validate_date(task.fecha_inicio, "Fecha inicio")
-    validate_date(task.fecha_prevista, "Fecha prevista")
-    validate_date(task.fecha_finalizacion, "Fecha finalización")
-    return True
+    return {
+        "author": author[:100],
+        "text": text[:5000],
+    }
