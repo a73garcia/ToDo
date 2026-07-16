@@ -1,37 +1,28 @@
 """
 config.py
-Configuración general del proyecto ToDo
+Configuración general de ToDo - Versión 2.0.
 """
 
 from pathlib import Path
 
-# -------------------------
-# Rutas
-# -------------------------
 
 BASE_DIR = Path(__file__).resolve().parent
 
 DATA_DIR = BASE_DIR / "data"
-BACKUP_DIR = BASE_DIR / "backups"
+BACKUP_DIR = DATA_DIR / "backups"
+LOG_DIR = DATA_DIR / "logs"
+
 STATIC_DIR = BASE_DIR / "static"
 TEMPLATE_DIR = BASE_DIR / "templates"
 SRC_DIR = BASE_DIR / "src"
 
 EXCEL_FILE = DATA_DIR / "tareas.xlsx"
 
-# -------------------------
-# Aplicación
-# -------------------------
-
 APP_NAME = "ToDo"
-APP_VERSION = "0.1.0"
+APP_VERSION = "2.0.0"
 
 HOST = "127.0.0.1"
 PORT = 8000
-
-# -------------------------
-# Estados
-# -------------------------
 
 TASK_STATES = [
     "Pendiente",
@@ -41,11 +32,7 @@ TASK_STATES = [
     "Cancelada",
 ]
 
-DEFAULT_STATE = TASK_STATES[0]
-
-# -------------------------
-# Prioridades
-# -------------------------
+DEFAULT_STATE = "Pendiente"
 
 TASK_PRIORITIES = [
     "Baja",
@@ -55,10 +42,6 @@ TASK_PRIORITIES = [
 ]
 
 DEFAULT_PRIORITY = "Media"
-
-# -------------------------
-# Columnas del Excel
-# -------------------------
 
 EXCEL_COLUMNS = [
     "ID",
@@ -74,17 +57,26 @@ EXCEL_COLUMNS = [
     "Última actualización",
     "Avance (%)",
     "Observaciones",
+    "Etiquetas",
+    "Comentarios",
+    "Favorito",
+    "Recordatorio",
+    "Proyecto",
+    "Tiempo estimado",
+    "Tiempo empleado",
+    "Versión",
 ]
 
-# -------------------------
-# Crear carpetas necesarias
-# -------------------------
 
 def ensure_directories():
     for folder in (
         DATA_DIR,
         BACKUP_DIR,
+        LOG_DIR,
         STATIC_DIR,
+        STATIC_DIR / "css",
+        STATIC_DIR / "js",
+        STATIC_DIR / "assets",
         TEMPLATE_DIR,
         SRC_DIR,
     ):
@@ -94,4 +86,4 @@ def ensure_directories():
 if __name__ == "__main__":
     ensure_directories()
     print(f"{APP_NAME} {APP_VERSION}")
-    print("Estructura inicial preparada.")
+    print("Estructura preparada.")
