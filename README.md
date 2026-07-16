@@ -1,117 +1,96 @@
 # ToDo
 
-Aplicación local para gestionar tareas, responsables, fechas, estados y avances diarios, utilizando:
+Aplicación local para gestionar tareas mediante una interfaz web y almacenar los datos en un archivo Excel `.xlsx`.
 
-- HTML, CSS y JavaScript para la interfaz.
-- Python 3.13 como servidor local.
-- Excel `.xlsx` como almacenamiento.
-- Sin necesidad de instalar software adicional en el equipo.
+## Funciones disponibles
 
-## Objetivo
+- Alta, edición y eliminación de tareas.
+- Estados: Pendiente, En curso, Bloqueada, Finalizada y Cancelada.
+- Responsable, prioridad, fechas, observaciones y porcentaje de avance.
+- Dashboard y calendario.
+- Búsqueda y filtros desde la interfaz.
+- Historial de cambios dentro del libro Excel.
+- Copias de seguridad antes de cada modificación.
+- API REST integrada en el mismo servidor de la aplicación.
 
-La aplicación permitirá:
+## Requisitos
 
-- Crear tareas.
-- Editar tareas existentes.
-- Cambiar su estado.
-- Registrar avances diarios.
-- Asignar responsables.
-- Definir fechas de creación y finalización.
-- Consultar tareas pendientes, en curso y finalizadas.
-- Visualizar un calendario de tareas.
-- Guardar toda la información en un archivo Excel.
-- Crear copias de seguridad.
+- Python 3.13.3.
+- Navegador web moderno.
+- Paquete Python `openpyxl`, indicado en `requirements.txt`.
 
-## Estados previstos
-
-- Pendiente
-- En curso
-- Bloqueada
-- Finalizada
-- Cancelada
-
-## Estructura inicial
-
-```text
-ToDo/
-├── app.py
-├── README.md
-├── config.py
-├── data/
-│   └── tareas.xlsx
-├── static/
-│   ├── css/
-│   │   └── estilos.css
-│   └── js/
-│       └── app.js
-├── templates/
-│   └── index.html
-├── src/
-│   ├── __init__.py
-│   ├── excel_manager.py
-│   ├── task_manager.py
-│   └── backup_manager.py
-└── backups/
-```
-
-## Fases del proyecto
-
-### Versión 0.1
-
-- Servidor Python local.
-- Interfaz HTML inicial.
-- Creación automática del Excel.
-- Alta de tareas.
-- Listado de tareas.
-- Cambio de estado.
-
-### Versión 0.2
-
-- Edición de tareas.
-- Historial diario de avances.
-- Filtros y búsquedas.
-- Calendario mensual.
-
-### Versión 0.3
-
-- Panel de indicadores.
-- Copias de seguridad.
-- Exportaciones.
-- Mejoras de interfaz.
-
-### Versión 1.0
-
-- Aplicación estable.
-- Validaciones completas.
-- Documentación de uso.
-- Preparación para publicación en GitHub.
-
-## Ejecución prevista
+## Preparación
 
 Desde la carpeta del proyecto:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+## Ejecución
 
 ```bash
 python app.py
 ```
 
-Después se abrirá la aplicación en el navegador mediante una dirección local similar a:
+La aplicación abrirá automáticamente el navegador en:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## Requisitos
+Para cerrarla, vuelve a la ventana de comandos y pulsa `Ctrl+C`.
 
-- Python 3.13.3
-- Navegador web moderno
-- No se utilizarán librerías externas salvo que sean estrictamente necesarias y se acuerde previamente.
+## Almacenamiento
 
-## Rama de desarrollo
-
-El desarrollo se realizará inicialmente sobre la rama:
+Al iniciar la aplicación, si no existe, se crea un libro válido en:
 
 ```text
-develop
+data/tareas.xlsx
 ```
 
-La rama `main` se reservará para versiones estables.
+El libro contiene estas hojas:
+
+- `Tareas`: información principal.
+- `Historial`: registro de creaciones, actualizaciones y eliminaciones.
+- `Configuración`: versión, estados y prioridades disponibles.
+
+Antes de modificar el libro se crea una copia en `backups/`.
+
+## Estructura principal
+
+```text
+ToDo/
+├── app.py
+├── config.py
+├── requirements.txt
+├── data/
+│   └── tareas.xlsx
+├── backups/
+├── static/
+│   ├── css/
+│   │   └── estilos.css
+│   └── js/
+│       └── app.js
+└── templates/
+    └── index.html
+```
+
+## API
+
+El servidor integrado proporciona:
+
+- `GET /api/health`
+- `GET /api/tasks`
+- `GET /api/tasks/{id}`
+- `POST /api/tasks`
+- `PATCH /api/tasks/{id}`
+- `PUT /api/tasks/{id}`
+- `DELETE /api/tasks/{id}`
+- `GET /api/dashboard`
+- `GET /api/calendar`
+- `GET /api/history`
+
+## Rama actual
+
+El proyecto se encuentra actualmente en `main`. Cuando se cree una rama `develop`, las nuevas funciones podrán desarrollarse allí y reservar `main` para versiones estables.
