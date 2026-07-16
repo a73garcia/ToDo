@@ -1,8 +1,6 @@
 /*
-filters.txt
+filters_revisado.txt
 Renombrar a: static/js/filters.js
-
-Centraliza la lógica de filtros y búsquedas.
 */
 
 "use strict";
@@ -12,35 +10,29 @@ window.Filters = (() => {
     let dashboardFilter = null;
 
     function init() {
-        [
-            "txtSearch",
-            "filterStatus",
-            "filterPriority",
-            "filterResponsible",
-            "sortTasks"
-        ].forEach(id => {
-            document.getElementById(id)
-                ?.addEventListener("input", apply);
-            document.getElementById(id)
-                ?.addEventListener("change", apply);
-        });
-
         document.querySelectorAll("[data-dashboard-filter]")
             .forEach(card => {
                 card.addEventListener("click", () => {
-                    applyDashboard(card.dataset.dashboardFilter);
+                    applyDashboard(
+                        card.dataset.dashboardFilter
+                    );
                 });
             });
-
-        document.getElementById("btnClearFilters")
-            ?.addEventListener("click", clear);
     }
 
     function applyDashboard(filter) {
         dashboardFilter = filter || null;
 
-        if (window.App?.changeView) {
-            window.App.changeView("tasks");
+        window.App?.changeView("tasks");
+
+        const status =
+            document.getElementById("filterStatus");
+
+        const sort =
+            document.getElementById("sortTasks");
+
+        if (status) {
+            status.value = "";
         }
 
         if (filter === "all") {
@@ -48,42 +40,58 @@ window.Filters = (() => {
             return;
         }
 
-        const status = document.getElementById("filterStatus");
+        if (
+            status &&
+            [
+                "Pendiente",
+                "En curso",
+                "Bloqueada",
+                "Finalizada",
+                "Cancelada"
+            ].includes(filter)
+        ) {
+            status.value = filter;
+        }
 
-        if (status) {
-            if (["Pendiente","En curso","Bloqueada","Finalizada","Cancelada"].includes(filter)) {
-                status.value = filter;
-            } else {
-                status.value = "";
-            }
+        if (filter === "progress" && sort) {
+            sort.value = "progress-desc";
         }
 
         apply();
     }
 
     function clear() {
-        ["txtSearch","filterStatus","filterPriority","filterResponsible"]
-            .forEach(id => {
-                const e = document.getElementById(id);
-                if (e) e.value = "";
-            });
+        [
+            "txtSearch",
+            "filterStatus",
+            "filterPriority",
+            "filterResponsible"
+        ].forEach(id => {
+            const element = document.getElementById(id);
 
-        const sort = document.getElementById("sortTasks");
-        if (sort) sort.value = "id-desc";
+            if (element) {
+                element.value = "";
+            }
+        });
+
+        const sort =
+            document.getElementById("sortTasks");
+
+        if (sort) {
+            sort.value = "id-desc";
+        }
 
         dashboardFilter = null;
-        apply();
+        window.TasksUI?.render();
     }
 
     function apply() {
-        if (!window.TasksUI) return;
-
         if (dashboardFilter === "overdue") {
-            window.TasksUI.applyOverdueFilter();
+            window.TasksUI?.applyOverdueFilter();
             return;
         }
 
-        window.TasksUI.render();
+        window.TasksUI?.render();
     }
 
     function getDashboardFilter() {

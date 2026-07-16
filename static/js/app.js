@@ -1,204 +1,196 @@
 /*
-app.js
-Parte 1 - Lógica principal del frontend
+app_revisado.txt
+Renombrar a: static/js/app.js
+
+Coordinador principal de ToDo - Versión 2.0 revisada.
 */
 
 "use strict";
 
-const App = {
+window.App = (() => {
 
-    tasks: [],
+    let tasks = [];
 
-    currentView: "dashboard",
+    async function init() {
+        window.Notifications?.init();
+        window.CommentsUI?.init();
+        window.Modals?.init();
+        window.TasksUI?.init();
+        window.Filters?.init();
 
-    init() {
+        bindNavigation();
+        showCurrentDate();
+        bindTheme();
 
-        this.cache();
+        await reloadData();
+        changeView("dashboard");
+    }
 
-        this.bindEvents();
+    async function reloadData() {
+        try {
+            tasks = await window.Api.Tasks.all();
 
-        this.showDate();
+            window.TasksUI?.setTasks(tasks);
+            await window.DashboardUI?.render(tasks);
+            window.CalendarUI?.render(tasks);
 
-        this.changeView("dashboard");
+        } catch (error) {
+            console.error(error);
 
-        this.renderTable();
+            window.Notifications?.error(
+                error.message ||
+                "No se pudieron cargar los datos."
+            );
+        }
+    }
 
-    },
+    function bindNavigation() {
+        document.querySelectorAll(".nav-item")
+            .forEach(button => {
+                button.addEventListener("click", () => {
+                    changeView(button.dataset.view);
+                });
+            });
+    }
 
-    cache() {
-
-        this.views = document.querySelectorAll(".view");
-        this.menuButtons = document.querySelectorAll(".menu-item");
-
-        this.modal = document.getElementById("taskModal");
-
-        this.form = document.getElementById("taskForm");
-
-        this.table = document.querySelector("#taskTable tbody");
-
-        this.search = document.getElementById("txtSearch");
-
-        this.btnNew = document.getElementById("btnNewTask");
-
-        this.btnCancel = document.getElementById("btnCancel");
-
-    },
-
-    bindEvents() {
-
-        this.menuButtons.forEach(btn => {
-
-            btn.addEventListener("click", () => {
-                this.changeView(btn.dataset.view);
+    function changeView(view) {
+        document.querySelectorAll(".view")
+            .forEach(section => {
+                section.classList.toggle(
+                    "active",
+                    section.id === view
+                );
             });
 
-        });
+        document.querySelectorAll(".nav-item")
+            .forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.view === view
+                );
+            });
 
-        this.btnNew.addEventListener("click", () => this.openModal());
+        const titles = {
+            dashboard: "Dashboard",
+            tasks: "Tareas",
+            calendar: "Calendario",
+            reports: "Informes",
+            settings: "Configuración"
+        };
 
-        this.btnCancel.addEventListener("click", () => this.closeModal());
+        const title = document.getElementById("pageTitle");
 
-        this.form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            this.saveTask();
-        });
+        if (title) {
+            title.textContent = titles[view] || "ToDo";
+        }
 
-        this.search.addEventListener("input", () => {
-            this.renderTable(this.search.value);
-        });
+        if (view === "calendar") {
+            window.CalendarUI?.render(tasks);
+        }
+    }
 
-    },
+    function showCurrentDate() {
+        const element = document.getElementById("currentDate");
 
-    changeView(view) {
+        if (!element) {
+            return;
+        }
 
-        this.currentView = view;
-
-        this.views.forEach(v => v.classList.remove("active"));
-
-        document.getElementById(view).classList.add("active");
-
-        this.menuButtons.forEach(b => b.classList.remove("active"));
-
-        document.querySelector(`[data-view="${view}"]`).classList.add("active");
-
-    },
-
-    showDate() {
-
-        const d = new Date();
-
-        document.getElementById("currentDate").textContent =
-            d.toLocaleDateString("es-ES", {
+        element.textContent = new Intl.DateTimeFormat(
+            "es-ES",
+            {
                 weekday: "long",
                 day: "numeric",
                 month: "long",
                 year: "numeric"
-            });
-
-    },
-
-    openModal() {
-
-        this.form.reset();
-
-        this.modal.classList.remove("hidden");
-
-    },
-
-    closeModal() {
-
-        this.modal.classList.add("hidden");
-
-    },
-
-    saveTask() {
-
-        const task = {
-
-            id: Date.now(),
-
-            titulo: document.getElementById("titulo").value,
-
-            descripcion: document.getElementById("descripcion").value,
-
-            responsable: document.getElementById("responsable").value,
-
-            prioridad: document.getElementById("prioridad").value,
-
-            fecha: document.getElementById("fechaPrevista").value,
-
-            estado: "Pendiente",
-
-            avance: 0
-
-        };
-
-        this.tasks.push(task);
-
-        this.renderTable();
-
-        this.updateDashboard();
-
-        this.closeModal();
-
-    },
-
-    renderTable(filter = "") {
-
-        this.table.innerHTML = "";
-
-        let data = this.tasks;
-
-        if (filter.trim() !== "") {
-
-            const text = filter.toLowerCase();
-
-            data = data.filter(t =>
-                t.titulo.toLowerCase().includes(text) ||
-                t.responsable.toLowerCase().includes(text)
-            );
-
-        }
-
-        data.forEach(task => {
-
-            const tr = document.createElement("tr");
-
-            tr.innerHTML = `
-                <td>${task.id}</td>
-                <td>${task.titulo}</td>
-                <td>${task.responsable}</td>
-                <td>${task.prioridad}</td>
-                <td>${task.estado}</td>
-                <td>-</td>
-                <td>${task.fecha}</td>
-                <td>${task.avance}%</td>
-                <td>
-                    <button onclick="alert('Edición en desarrollo')">✏️</button>
-                </td>
-            `;
-
-            this.table.appendChild(tr);
-
-        });
-
-    },
-
-    updateDashboard() {
-
-        document.getElementById("totalTasks").textContent = this.tasks.length;
-
-        document.getElementById("pendingTasks").textContent =
-            this.tasks.filter(t => t.estado === "Pendiente").length;
-
-        document.getElementById("runningTasks").textContent =
-            this.tasks.filter(t => t.estado === "En curso").length;
-
-        document.getElementById("finishedTasks").textContent =
-            this.tasks.filter(t => t.estado === "Finalizada").length;
-
+            }
+        ).format(new Date());
     }
 
-};
+    function bindTheme() {
+        const select = document.getElementById("settingTheme");
 
-window.addEventListener("DOMContentLoaded", () => App.init());
+        if (!select) {
+            return;
+        }
+
+        const stored = localStorage.getItem("todo-theme") || "light";
+
+        select.value = stored;
+        document.body.classList.toggle(
+            "dark",
+            stored === "dark"
+        );
+
+        select.addEventListener("change", () => {
+            const dark = select.value === "dark";
+
+            document.body.classList.toggle("dark", dark);
+            localStorage.setItem(
+                "todo-theme",
+                dark ? "dark" : "light"
+            );
+        });
+    }
+
+    function editTask(id) {
+        const task = tasks.find(
+            item => Number(item.id) === Number(id)
+        );
+
+        if (task) {
+            window.Modals?.openTask(task);
+        }
+    }
+
+    function openTaskModal() {
+        window.Modals?.openTask();
+    }
+
+    async function deleteTask(id) {
+        const confirmed = window.Notifications?.confirm(
+            "¿Eliminar la tarea?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await window.Api.Tasks.remove(id);
+
+            window.Notifications?.success(
+                "Tarea eliminada."
+            );
+
+            await reloadData();
+
+        } catch (error) {
+            console.error(error);
+
+            window.Notifications?.error(
+                error.message ||
+                "No se pudo eliminar la tarea."
+            );
+        }
+    }
+
+    return {
+        init,
+        reloadData,
+        changeView,
+        editTask,
+        openTaskModal,
+        deleteTask,
+
+        get tasks() {
+            return tasks;
+        }
+    };
+
+})();
+
+window.addEventListener(
+    "DOMContentLoaded",
+    () => window.App.init()
+);
