@@ -6,12 +6,15 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+    <meta
+        name="description"
+        content="Aplicación local para gestionar tareas, calendario, comentarios e informes."
+    >
 
-    <title>ToDo - Gestor de tareas</title>
+    <title>ToDo · Gestión de tareas</title>
 
     <link rel="stylesheet" href="/css/estilos.css">
 
-    <!-- Orden obligatorio de módulos -->
     <script defer src="/js/utils.js"></script>
     <script defer src="/js/api.js"></script>
     <script defer src="/js/notifications.js"></script>
@@ -28,12 +31,18 @@
 
 <div id="app" class="app-shell">
 
-    <aside class="sidebar">
+    <aside class="sidebar" aria-label="Navegación principal">
 
         <div class="brand">
-            <div class="brand-icon">T</div>
+            <div class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/>
+                    <path d="m8.5 11 2 2 5-5"/>
+                    <path d="M9 17h6"/>
+                </svg>
+            </div>
 
-            <div>
+            <div class="brand-copy">
                 <h1>ToDo</h1>
                 <span>Gestión de tareas</span>
             </div>
@@ -45,8 +54,16 @@
                 class="nav-item active"
                 type="button"
                 data-view="dashboard"
+                aria-label="Abrir Dashboard"
             >
-                <span class="nav-icon">▦</span>
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="2"/>
+                        <rect x="14" y="3" width="7" height="7" rx="2"/>
+                        <rect x="3" y="14" width="7" height="7" rx="2"/>
+                        <rect x="14" y="14" width="7" height="7" rx="2"/>
+                    </svg>
+                </span>
                 <span>Dashboard</span>
             </button>
 
@@ -54,8 +71,18 @@
                 class="nav-item"
                 type="button"
                 data-view="tasks"
+                aria-label="Abrir tareas"
             >
-                <span class="nav-icon">✓</span>
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 6h11"/>
+                        <path d="M9 12h11"/>
+                        <path d="M9 18h11"/>
+                        <path d="m3 6 1.5 1.5L7 5"/>
+                        <path d="m3 12 1.5 1.5L7 11"/>
+                        <path d="m3 18 1.5 1.5L7 17"/>
+                    </svg>
+                </span>
                 <span>Tareas</span>
             </button>
 
@@ -63,8 +90,14 @@
                 class="nav-item"
                 type="button"
                 data-view="calendar"
+                aria-label="Abrir calendario"
             >
-                <span class="nav-icon">◫</span>
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="5" width="18" height="16" rx="2"/>
+                        <path d="M16 3v4M8 3v4M3 10h18"/>
+                    </svg>
+                </span>
                 <span>Calendario</span>
             </button>
 
@@ -72,8 +105,16 @@
                 class="nav-item"
                 type="button"
                 data-view="reports"
+                aria-label="Abrir informes"
             >
-                <span class="nav-icon">◩</span>
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 19V9"/>
+                        <path d="M10 19V5"/>
+                        <path d="M16 19v-7"/>
+                        <path d="M22 19V3"/>
+                    </svg>
+                </span>
                 <span>Informes</span>
             </button>
 
@@ -81,15 +122,29 @@
                 class="nav-item"
                 type="button"
                 data-view="settings"
+                aria-label="Abrir configuración"
             >
-                <span class="nav-icon">⚙</span>
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.1 2.1-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-3v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L6.6 17l.1-.1A1.7 1.7 0 0 0 7 15a1.7 1.7 0 0 0-1.5-1H5v-3h.5A1.7 1.7 0 0 0 7 10a1.7 1.7 0 0 0-.3-1.9L6.6 8 8.7 5.9l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V4h3v.8a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 8l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1v3h-.1a1.7 1.7 0 0 0-1.5 1Z"/>
+                    </svg>
+                </span>
                 <span>Configuración</span>
             </button>
 
         </nav>
 
         <div class="sidebar-footer">
-            <span>ToDo v2.0</span>
+            <div class="storage-status">
+                <span class="storage-dot"></span>
+                <div>
+                    <strong>Almacenamiento local</strong>
+                    <small>Excel sincronizado</small>
+                </div>
+            </div>
+
+            <span class="app-version">ToDo v2.0</span>
         </div>
 
     </aside>
@@ -98,30 +153,37 @@
 
         <header class="topbar">
 
-            <div>
+            <div class="page-heading">
                 <h2 id="pageTitle">Dashboard</h2>
-                <p id="currentDate"></p>
+                <p id="currentDate">Cargando fecha...</p>
             </div>
 
             <div class="topbar-actions">
 
                 <label class="global-search">
-                    <span>⌕</span>
+                    <span class="search-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="7"/>
+                            <path d="m20 20-3.5-3.5"/>
+                        </svg>
+                    </span>
 
                     <input
                         id="txtSearch"
                         type="search"
-                        placeholder="Buscar tareas..."
+                        placeholder="Buscar tareas, responsables o etiquetas..."
                         autocomplete="off"
+                        aria-label="Buscar tareas"
                     >
                 </label>
 
                 <button
                     id="btnNewTask"
-                    class="btn btn-primary"
+                    class="btn btn-primary btn-icon-text"
                     type="button"
                 >
-                    + Nueva tarea
+                    <span aria-hidden="true">+</span>
+                    Nueva tarea
                 </button>
 
             </div>
@@ -132,88 +194,139 @@
 
             <div class="section-heading">
                 <div>
-                    <h3>Resumen general</h3>
-                    <p>Estado actual del trabajo y próximos vencimientos.</p>
+                    <span class="eyebrow">Vista general</span>
+                    <h3>Resumen de trabajo</h3>
+                    <p>Consulta el estado actual, los próximos vencimientos y la actividad reciente.</p>
                 </div>
             </div>
 
             <div class="kpi-grid">
 
                 <button
-                    class="kpi-card"
+                    class="kpi-card kpi-total"
                     type="button"
                     data-dashboard-filter="all"
                 >
+                    <span class="kpi-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 6h11M9 12h11M9 18h11"/>
+                            <path d="m3 6 1.5 1.5L7 5"/>
+                            <path d="m3 12 1.5 1.5L7 11"/>
+                            <path d="m3 18 1.5 1.5L7 17"/>
+                        </svg>
+                    </span>
                     <span class="kpi-label">Total</span>
                     <strong id="totalTasks">0</strong>
                     <small>Todas las tareas</small>
                 </button>
 
                 <button
-                    class="kpi-card status-pending"
+                    class="kpi-card kpi-pending"
                     type="button"
                     data-dashboard-filter="Pendiente"
                 >
+                    <span class="kpi-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 7v5l3 2"/>
+                        </svg>
+                    </span>
                     <span class="kpi-label">Pendientes</span>
                     <strong id="pendingTasks">0</strong>
                     <small>Sin comenzar</small>
                 </button>
 
                 <button
-                    class="kpi-card status-running"
+                    class="kpi-card kpi-running"
                     type="button"
                     data-dashboard-filter="En curso"
                 >
+                    <span class="kpi-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 12a8 8 0 1 1 8 8"/>
+                            <path d="M4 16v-4h4"/>
+                        </svg>
+                    </span>
                     <span class="kpi-label">En curso</span>
                     <strong id="runningTasks">0</strong>
                     <small>Trabajo activo</small>
                 </button>
 
                 <button
-                    class="kpi-card status-blocked"
+                    class="kpi-card kpi-blocked"
                     type="button"
                     data-dashboard-filter="Bloqueada"
                 >
+                    <span class="kpi-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 3 2.8 20h18.4L12 3Z"/>
+                            <path d="M12 9v4M12 17h.01"/>
+                        </svg>
+                    </span>
                     <span class="kpi-label">Bloqueadas</span>
                     <strong id="blockedTasks">0</strong>
                     <small>Requieren atención</small>
                 </button>
 
                 <button
-                    class="kpi-card status-finished"
+                    class="kpi-card kpi-finished"
                     type="button"
                     data-dashboard-filter="Finalizada"
                 >
+                    <span class="kpi-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="m8 12 2.5 2.5L16 9"/>
+                        </svg>
+                    </span>
                     <span class="kpi-label">Finalizadas</span>
                     <strong id="finishedTasks">0</strong>
                     <small>Completadas</small>
                 </button>
 
                 <button
-                    class="kpi-card status-cancelled"
+                    class="kpi-card kpi-cancelled"
                     type="button"
                     data-dashboard-filter="Cancelada"
                 >
+                    <span class="kpi-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="m9 9 6 6M15 9l-6 6"/>
+                        </svg>
+                    </span>
                     <span class="kpi-label">Canceladas</span>
                     <strong id="cancelledTasks">0</strong>
                     <small>No continúan</small>
                 </button>
 
                 <button
-                    class="kpi-card status-overdue"
+                    class="kpi-card kpi-overdue"
                     type="button"
                     data-dashboard-filter="overdue"
                 >
+                    <span class="kpi-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M8 2v3M16 2v3M4 8h16"/>
+                            <rect x="3" y="4" width="18" height="17" rx="2"/>
+                            <path d="m9 13 6 6M15 13l-6 6"/>
+                        </svg>
+                    </span>
                     <span class="kpi-label">Retrasadas</span>
                     <strong id="overdueTasks">0</strong>
                     <small>Fuera de plazo</small>
                 </button>
 
                 <button
-                    class="kpi-card"
+                    class="kpi-card kpi-progress"
                     type="button"
                     data-dashboard-filter="progress"
                 >
+                    <span class="kpi-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/>
+                        </svg>
+                    </span>
                     <span class="kpi-label">Avance medio</span>
                     <strong id="averageProgress">0%</strong>
                     <small>Progreso global</small>
@@ -223,43 +336,55 @@
 
             <div class="dashboard-grid">
 
-                <article class="panel">
+                <article class="panel dashboard-status-panel">
+
                     <div class="panel-header">
                         <div>
+                            <span class="panel-kicker">Estado</span>
                             <h3>Distribución por estado</h3>
-                            <p>Vista rápida de la carga actual.</p>
+                            <p>Vista rápida de la carga de trabajo actual.</p>
                         </div>
                     </div>
 
                     <div id="statusChart" class="chart-placeholder">
-                        Sin datos
+                        <div class="loading-placeholder">
+                            <span class="loading-spinner"></span>
+                            Cargando estadísticas...
+                        </div>
                     </div>
+
                 </article>
 
                 <article class="panel">
+
                     <div class="panel-header">
                         <div>
+                            <span class="panel-kicker">Planificación</span>
                             <h3>Próximos vencimientos</h3>
-                            <p>Tareas previstas para los próximos días.</p>
+                            <p>Tareas previstas para los próximos 14 días.</p>
                         </div>
                     </div>
 
                     <div id="upcomingTasks" class="stack-list">
                         <p class="empty-state">No hay tareas próximas.</p>
                     </div>
+
                 </article>
 
                 <article class="panel panel-wide">
+
                     <div class="panel-header">
                         <div>
+                            <span class="panel-kicker">Seguimiento</span>
                             <h3>Actividad reciente</h3>
-                            <p>Últimos cambios registrados.</p>
+                            <p>Últimos cambios registrados en las tareas.</p>
                         </div>
                     </div>
 
                     <div id="recentActivity" class="activity-list">
                         <p class="empty-state">No hay actividad registrada.</p>
                     </div>
+
                 </article>
 
             </div>
@@ -270,82 +395,108 @@
 
             <div class="section-heading">
                 <div>
+                    <span class="eyebrow">Organización</span>
                     <h3>Gestión de tareas</h3>
-                    <p>Consulta, filtra y actualiza el trabajo.</p>
+                    <p>Consulta, filtra, edita y realiza seguimiento del trabajo.</p>
                 </div>
             </div>
 
             <div class="filters-bar">
 
-                <select id="filterStatus">
-                    <option value="">Todos los estados</option>
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="En curso">En curso</option>
-                    <option value="Bloqueada">Bloqueada</option>
-                    <option value="Finalizada">Finalizada</option>
-                    <option value="Cancelada">Cancelada</option>
-                </select>
+                <label class="filter-field">
+                    <span>Estado</span>
+                    <select id="filterStatus">
+                        <option value="">Todos</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En curso">En curso</option>
+                        <option value="Bloqueada">Bloqueada</option>
+                        <option value="Finalizada">Finalizada</option>
+                        <option value="Cancelada">Cancelada</option>
+                    </select>
+                </label>
 
-                <select id="filterPriority">
-                    <option value="">Todas las prioridades</option>
-                    <option value="Baja">Baja</option>
-                    <option value="Media">Media</option>
-                    <option value="Alta">Alta</option>
-                    <option value="Crítica">Crítica</option>
-                </select>
+                <label class="filter-field">
+                    <span>Prioridad</span>
+                    <select id="filterPriority">
+                        <option value="">Todas</option>
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Crítica">Crítica</option>
+                    </select>
+                </label>
 
-                <select id="filterResponsible">
-                    <option value="">Todos los responsables</option>
-                </select>
+                <label class="filter-field">
+                    <span>Responsable</span>
+                    <select id="filterResponsible">
+                        <option value="">Todos</option>
+                    </select>
+                </label>
 
-                <select id="sortTasks">
-                    <option value="id-desc">Más recientes</option>
-                    <option value="id-asc">Más antiguas</option>
-                    <option value="title-asc">Título A-Z</option>
-                    <option value="date-asc">Fecha prevista</option>
-                    <option value="progress-desc">Mayor avance</option>
-                </select>
+                <label class="filter-field">
+                    <span>Orden</span>
+                    <select id="sortTasks">
+                        <option value="id-desc">Más recientes</option>
+                        <option value="id-asc">Más antiguas</option>
+                        <option value="title-asc">Título A-Z</option>
+                        <option value="date-asc">Fecha prevista</option>
+                        <option value="progress-desc">Mayor avance</option>
+                    </select>
+                </label>
 
-                <button
-                    id="btnClearFilters"
-                    class="btn btn-secondary"
-                    type="button"
-                >
-                    Limpiar
-                </button>
+                <div class="filter-actions">
+                    <button
+                        id="btnClearFilters"
+                        class="btn btn-secondary"
+                        type="button"
+                    >
+                        Limpiar
+                    </button>
 
-                <button
-                    id="btnExportCsv"
-                    class="btn btn-secondary"
-                    type="button"
-                >
-                    Exportar CSV
-                </button>
+                    <button
+                        id="btnExportCsv"
+                        class="btn btn-secondary"
+                        type="button"
+                    >
+                        Exportar CSV
+                    </button>
+                </div>
 
             </div>
 
-            <div class="table-wrapper">
+            <div class="table-card">
 
-                <table id="taskTable">
+                <div class="table-card-header">
+                    <div>
+                        <h4>Listado de tareas</h4>
+                        <p>Los cambios rápidos se guardan automáticamente.</p>
+                    </div>
+                </div>
 
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Tarea</th>
-                            <th>Responsable</th>
-                            <th>Prioridad</th>
-                            <th>Estado</th>
-                            <th>Inicio</th>
-                            <th>Prevista</th>
-                            <th>Avance</th>
-                            <th>Comentarios</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
+                <div class="table-wrapper">
 
-                    <tbody></tbody>
+                    <table id="taskTable">
 
-                </table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tarea</th>
+                                <th>Responsable</th>
+                                <th>Prioridad</th>
+                                <th>Estado</th>
+                                <th>Inicio</th>
+                                <th>Prevista</th>
+                                <th>Avance</th>
+                                <th>Comentarios</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody></tbody>
+
+                    </table>
+
+                </div>
 
             </div>
 
@@ -355,8 +506,9 @@
 
             <div class="section-heading">
                 <div>
-                    <h3>Calendario</h3>
-                    <p>Planificación mensual y vencimientos.</p>
+                    <span class="eyebrow">Planificación</span>
+                    <h3>Calendario mensual</h3>
+                    <p>Visualiza las fechas previstas y mueve tareas entre días.</p>
                 </div>
             </div>
 
@@ -416,47 +568,48 @@
 
                     <div class="panel-header">
                         <div>
-                            <h3>Resumen del mes</h3>
+                            <span class="panel-kicker">Resumen</span>
+                            <h3>Estado del mes</h3>
                             <p id="calendarSummaryTitle">Sin datos</p>
                         </div>
                     </div>
 
                     <div class="summary-list">
-                        <div>
+
+                        <div class="summary-item">
                             <span>Total</span>
                             <strong id="calendarTotal">0</strong>
                         </div>
 
-                        <div>
+                        <div class="summary-item">
                             <span>Pendientes</span>
                             <strong id="calendarPending">0</strong>
                         </div>
 
-                        <div>
+                        <div class="summary-item">
                             <span>En curso</span>
                             <strong id="calendarRunning">0</strong>
                         </div>
 
-                        <div>
+                        <div class="summary-item">
                             <span>Bloqueadas</span>
                             <strong id="calendarBlocked">0</strong>
                         </div>
 
-                        <div>
+                        <div class="summary-item">
                             <span>Finalizadas</span>
                             <strong id="calendarFinished">0</strong>
                         </div>
+
                     </div>
 
                     <div class="selected-day">
 
-                        <h4 id="selectedDayTitle">
-                            Selecciona un día
-                        </h4>
+                        <h4 id="selectedDayTitle">Selecciona un día</h4>
 
                         <div id="selectedDayTasks">
                             <p class="empty-state">
-                                No hay un día seleccionado.
+                                Selecciona un día del calendario para ver sus tareas.
                             </p>
                         </div>
 
@@ -472,14 +625,48 @@
 
             <div class="section-heading">
                 <div>
-                    <h3>Informes</h3>
-                    <p>Indicadores y exportaciones del proyecto.</p>
+                    <span class="eyebrow">Análisis</span>
+                    <h3>Informes y exportaciones</h3>
+                    <p>Genera copias y archivos de seguimiento del proyecto.</p>
                 </div>
             </div>
 
-            <article class="panel">
-                <p class="empty-state">
-                    La sección de informes se ampliará en la siguiente fase.
+            <div class="reports-grid">
+
+                <article class="report-card">
+                    <span class="report-icon">XLSX</span>
+                    <h4>Libro Excel</h4>
+                    <p>Abre el archivo principal con tareas, historial y configuración.</p>
+                    <span class="report-status">Almacenamiento principal</span>
+                </article>
+
+                <article class="report-card">
+                    <span class="report-icon">CSV</span>
+                    <h4>Exportación CSV</h4>
+                    <p>Exporta el listado filtrado desde la sección Tareas.</p>
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="window.TasksUI?.exportCSV()"
+                    >
+                        Exportar
+                    </button>
+                </article>
+
+                <article class="report-card">
+                    <span class="report-icon">BAK</span>
+                    <h4>Copia de seguridad</h4>
+                    <p>Las copias protegen el libro antes de los cambios importantes.</p>
+                    <span class="report-status report-status-success">Protección activa</span>
+                </article>
+
+            </div>
+
+            <article class="panel reports-note">
+                <h4>Próximas mejoras</h4>
+                <p>
+                    Esta sección queda preparada para añadir gráficos por responsable,
+                    tiempos invertidos, distribución por prioridad y exportación PDF.
                 </p>
             </article>
 
@@ -489,35 +676,90 @@
 
             <div class="section-heading">
                 <div>
+                    <span class="eyebrow">Preferencias</span>
                     <h3>Configuración</h3>
-                    <p>Preferencias generales de la aplicación.</p>
+                    <p>Personaliza la apariencia y el comportamiento de la aplicación.</p>
                 </div>
             </div>
 
-            <article class="panel settings-panel">
+            <div class="settings-layout">
 
-                <label>
-                    <span>Tema</span>
+                <article class="panel settings-panel">
 
-                    <select id="settingTheme">
-                        <option value="light">Claro</option>
-                        <option value="dark">Oscuro</option>
-                    </select>
-                </label>
+                    <div class="panel-header">
+                        <div>
+                            <span class="panel-kicker">Apariencia</span>
+                            <h3>Tema de la interfaz</h3>
+                        </div>
+                    </div>
 
-                <label>
-                    <span>Copias de seguridad máximas</span>
+                    <label class="setting-row">
+                        <div>
+                            <strong>Tema</strong>
+                            <small>Cambia entre modo claro y oscuro.</small>
+                        </div>
 
-                    <input
-                        id="settingBackups"
-                        type="number"
-                        min="1"
-                        max="100"
-                        value="20"
-                    >
-                </label>
+                        <select id="settingTheme">
+                            <option value="light">Claro</option>
+                            <option value="dark">Oscuro</option>
+                        </select>
+                    </label>
 
-            </article>
+                </article>
+
+                <article class="panel settings-panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <span class="panel-kicker">Seguridad</span>
+                            <h3>Copias de seguridad</h3>
+                        </div>
+                    </div>
+
+                    <label class="setting-row">
+                        <div>
+                            <strong>Copias máximas</strong>
+                            <small>Número máximo de archivos de respaldo conservados.</small>
+                        </div>
+
+                        <input
+                            id="settingBackups"
+                            type="number"
+                            min="1"
+                            max="100"
+                            value="20"
+                        >
+                    </label>
+
+                </article>
+
+                <article class="panel settings-panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <span class="panel-kicker">Información</span>
+                            <h3>Aplicación</h3>
+                        </div>
+                    </div>
+
+                    <dl class="app-info-list">
+                        <div>
+                            <dt>Versión</dt>
+                            <dd>2.0</dd>
+                        </div>
+                        <div>
+                            <dt>Almacenamiento</dt>
+                            <dd>Excel local</dd>
+                        </div>
+                        <div>
+                            <dt>Servidor</dt>
+                            <dd>Python integrado</dd>
+                        </div>
+                    </dl>
+
+                </article>
+
+            </div>
 
         </section>
 
@@ -525,15 +767,22 @@
 
 </div>
 
-<div id="taskModal" class="modal hidden">
+<div
+    id="taskModal"
+    class="modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="taskModalTitle"
+>
 
     <div class="modal-dialog modal-large">
 
         <div class="modal-header">
 
             <div>
+                <span class="panel-kicker">Tarea</span>
                 <h2 id="taskModalTitle">Nueva tarea</h2>
-                <p>Crea o actualiza la información de la tarea.</p>
+                <p>Crea o actualiza la información y el seguimiento.</p>
             </div>
 
             <button
@@ -553,7 +802,12 @@
 
                 <label class="field field-full">
                     <span>Título *</span>
-                    <input id="titulo" maxlength="200" required>
+                    <input
+                        id="titulo"
+                        maxlength="200"
+                        required
+                        placeholder="Describe la tarea de forma clara"
+                    >
                 </label>
 
                 <label class="field field-full">
@@ -562,17 +816,30 @@
                         id="descripcion"
                         rows="4"
                         maxlength="5000"
+                        placeholder="Añade contexto, alcance o instrucciones"
                     ></textarea>
                 </label>
 
                 <label class="field">
                     <span>Responsable</span>
-                    <input id="responsable" maxlength="100">
+                    <input
+                        id="responsable"
+                        maxlength="100"
+                        placeholder="Nombre del responsable"
+                    >
+                </label>
+
+                <label class="field">
+                    <span>Proyecto</span>
+                    <input
+                        id="proyecto"
+                        maxlength="150"
+                        placeholder="Proyecto o área"
+                    >
                 </label>
 
                 <label class="field">
                     <span>Prioridad</span>
-
                     <select id="prioridad">
                         <option value="Baja">Baja</option>
                         <option value="Media" selected>Media</option>
@@ -583,7 +850,6 @@
 
                 <label class="field">
                     <span>Estado</span>
-
                     <select id="estado">
                         <option value="Pendiente">Pendiente</option>
                         <option value="En curso">En curso</option>
@@ -591,22 +857,6 @@
                         <option value="Finalizada">Finalizada</option>
                         <option value="Cancelada">Cancelada</option>
                     </select>
-                </label>
-
-                <label class="field">
-                    <span>Avance</span>
-
-                    <div class="progress-edit">
-                        <input
-                            id="avance"
-                            type="range"
-                            min="0"
-                            max="100"
-                            value="0"
-                        >
-
-                        <output id="avanceOutput">0%</output>
-                    </div>
                 </label>
 
                 <label class="field">
@@ -620,8 +870,8 @@
                 </label>
 
                 <label class="field">
-                    <span>Proyecto</span>
-                    <input id="proyecto" maxlength="150">
+                    <span>Recordatorio</span>
+                    <input id="recordatorio" type="date">
                 </label>
 
                 <label class="field">
@@ -652,9 +902,19 @@
                     >
                 </label>
 
-                <label class="field">
-                    <span>Recordatorio</span>
-                    <input id="recordatorio" type="date">
+                <label class="field field-full">
+                    <span>Avance</span>
+
+                    <div class="progress-edit">
+                        <input
+                            id="avance"
+                            type="range"
+                            min="0"
+                            max="100"
+                            value="0"
+                        >
+                        <output id="avanceOutput">0%</output>
+                    </div>
                 </label>
 
                 <label class="field field-full">
@@ -663,13 +923,13 @@
                         id="observaciones"
                         rows="3"
                         maxlength="10000"
+                        placeholder="Añade notas internas o información adicional"
                     ></textarea>
                 </label>
 
             </div>
 
             <div class="modal-actions">
-
                 <button
                     id="btnCancel"
                     class="btn btn-secondary"
@@ -684,7 +944,6 @@
                 >
                     Guardar tarea
                 </button>
-
             </div>
 
         </form>
@@ -693,14 +952,21 @@
 
 </div>
 
-<div id="commentsModal" class="modal hidden">
+<div
+    id="commentsModal"
+    class="modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="commentsModalTitle"
+>
 
     <div class="modal-dialog comments-dialog">
 
         <div class="modal-header">
 
             <div>
-                <h2>Seguimiento y comentarios</h2>
+                <span class="panel-kicker">Seguimiento</span>
+                <h2 id="commentsModalTitle">Comentarios</h2>
                 <p id="commentsTaskTitle"></p>
             </div>
 
@@ -723,7 +989,11 @@
 
             <label class="field">
                 <span>Autor</span>
-                <input id="commentAuthor" maxlength="100">
+                <input
+                    id="commentAuthor"
+                    maxlength="100"
+                    placeholder="Nombre"
+                >
             </label>
 
             <label class="field field-full">
@@ -733,6 +1003,7 @@
                     rows="4"
                     maxlength="5000"
                     required
+                    placeholder="Describe avances, bloqueos o novedades"
                 ></textarea>
             </label>
 
@@ -751,7 +1022,12 @@
 
 </div>
 
-<div id="notify" class="notify hidden"></div>
+<div
+    id="notify"
+    class="notify hidden"
+    role="status"
+    aria-live="polite"
+></div>
 
 </body>
 </html>
